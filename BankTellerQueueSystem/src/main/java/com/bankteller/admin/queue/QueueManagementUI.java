@@ -1,7 +1,6 @@
-package com.bankteller.queue;
+package com.bankteller.admin.queue;
 
-import com.bankteller.queue.*;
-import com.bankteller.teller.*;
+import com.bankteller.admin.teller.Teller;
 import java.awt.*;
 import javax.swing.*;
 

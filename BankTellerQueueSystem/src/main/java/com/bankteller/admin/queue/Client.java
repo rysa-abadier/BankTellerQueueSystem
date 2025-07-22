@@ -1,7 +1,6 @@
-package com.bankteller.queue;
+package com.bankteller.admin.queue;
 
-import com.bankteller.service.*;
-import com.bankteller.teller.*;
+import com.bankteller.admin.teller.Teller;
 
 public class Client {
     private int accNum;

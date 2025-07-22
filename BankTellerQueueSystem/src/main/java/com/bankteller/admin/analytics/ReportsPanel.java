@@ -1,4 +1,4 @@
-package com.bankteller.analytics;
+package com.bankteller.admin.analytics;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

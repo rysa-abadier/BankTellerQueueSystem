@@ -1,6 +1,6 @@
-package com.bankteller.service;
+package com.bankteller.admin.service;
 
-import com.bankteller.queue.*;
+import com.bankteller.admin.queue.DBConnetion;
 
 public class Service {
     public DBConnetion db = new DBConnetion();

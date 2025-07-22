@@ -1,12 +1,8 @@
-package com.bankteller.dashboard;
+package com.bankteller.admin.dashboard;
 
-import com.bankteller.teller.TellerManagementUI;
-import com.bankteller.service.ServiceConfigUI;
-import com.bankteller.queue.QueueManagementUI;
-import com.bankteller.analytics.*;
-import com.bankteller.queue.*;
-import com.bankteller.service.*;
-import com.bankteller.teller.*;
+import com.bankteller.admin.teller.TellerManagementUI;
+import com.bankteller.admin.service.ServiceConfigUI;
+import com.bankteller.admin.queue.QueueManagementUI;
 import java.awt.Color;
 
 public class AdminDashboard extends javax.swing.JFrame {
@@ -78,7 +74,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new Color(245, 245, 245));
 
-        jPanel1.setLayout(new java.awt.GridLayout());
+        jPanel1.setLayout(new java.awt.GridLayout(1, 0));
 
         btnTellerManagement.setBackground(new Color(100, 181, 246));
         btnTellerManagement.setFont(new java.awt.Font("Monospaced", 1, 24)); // NOI18N
@@ -194,7 +190,7 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel5.setLayout(new java.awt.GridLayout());
+        jPanel5.setLayout(new java.awt.GridLayout(1, 0));
 
         AdminDashboardTitle.setBackground(new Color(230, 230, 230));
         AdminDashboardTitle.setFont(new java.awt.Font("Script MT Bold", 1, 48)); // NOI18N

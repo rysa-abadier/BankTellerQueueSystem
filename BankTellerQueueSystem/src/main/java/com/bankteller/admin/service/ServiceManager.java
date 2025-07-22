@@ -1,4 +1,4 @@
-package com.bankteller.service;
+package com.bankteller.admin.service;
 
 import java.util.ArrayList;
 

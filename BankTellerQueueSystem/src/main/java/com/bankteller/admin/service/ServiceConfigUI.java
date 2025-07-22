@@ -1,6 +1,5 @@
-package com.bankteller.service;
+package com.bankteller.admin.service;
 
-import com.bankteller.service.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;

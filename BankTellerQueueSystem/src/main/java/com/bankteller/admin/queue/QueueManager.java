@@ -1,6 +1,6 @@
-package com.bankteller.queue;
+package com.bankteller.admin.queue;
 
-import com.bankteller.teller.Teller;
+import com.bankteller.admin.teller.Teller;
 import java.util.*;
 
 public class QueueManager {

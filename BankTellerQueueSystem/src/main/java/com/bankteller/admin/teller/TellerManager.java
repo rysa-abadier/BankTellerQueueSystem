@@ -1,6 +1,6 @@
-package com.bankteller.teller;
+package com.bankteller.admin.teller;
 
-import com.bankteller.service.Service;
+import com.bankteller.admin.service.Service;
 import java.util.ArrayList;
 
 public class TellerManager {

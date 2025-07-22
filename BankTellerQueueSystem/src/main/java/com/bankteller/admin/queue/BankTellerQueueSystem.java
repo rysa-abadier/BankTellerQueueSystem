@@ -1,4 +1,4 @@
-package com.bankteller.queue;
+package com.bankteller.admin.queue;
 
 public class BankTellerQueueSystem {
 
