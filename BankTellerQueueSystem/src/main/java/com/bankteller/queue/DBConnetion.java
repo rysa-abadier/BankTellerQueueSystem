@@ -3,7 +3,7 @@ package com.bankteller.queue;
 import java.sql.*;
 
 public class DBConnetion {
-    private String server = "jdbc:mysql://localhost:3307/usersdb";
+    private String server = "jdbc:mysql://localhost:3307/banktellersystem_db"; //localhost:3306/banktellersystem_db";
     private String user = "root";
     private String pass = "";
 
