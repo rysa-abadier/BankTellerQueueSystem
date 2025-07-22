@@ -1,14 +1,14 @@
-com\bankteller\ui\ServiceConfigUI.class
+com\bankteller\service\ServiceConfigUI.class
 com\bankteller\dashboard\AdminDashboard$5.class
 com\bankteller\dashboard\AdminDashboard$6.class
 com\bankteller\analytics\ReportsTest.class
 com\bankteller\dashboard\AdminDashboard$4.class
 com\bankteller\queue\QueueManager.class
-com\bankteller\ui\QueueManagementUI.class
+com\bankteller\queue\QueueManagementUI.class
+com\bankteller\teller\TellerManagementUI.class
 com\bankteller\dashboard\AdminDashboard$3.class
 com\bankteller\analytics\ReportsPanel.class
 com\bankteller\service\ServiceManager.class
-com\bankteller\ui\TellerManagementUI.class
 com\bankteller\dashboard\AdminDashboard.class
 com\bankteller\queue\BankTellerQueueSystem.class
 com\bankteller\dashboard\AdminDashboard$2.class
