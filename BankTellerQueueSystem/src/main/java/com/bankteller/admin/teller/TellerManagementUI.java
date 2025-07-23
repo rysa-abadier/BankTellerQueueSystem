@@ -1,125 +1,117 @@
-package com.bankteller.admin.teller;
-
-import com.bankteller.admin.service.ServiceManager;
-import com.bankteller.admin.service.Service;
+package com.example.tellermanagement;
 import javax.swing.*;
-import java.awt.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 
-public class TellerManagementUI extends JFrame {
-    private TellerManager manager;
-    private ServiceManager serviceManager;
-    private JTextArea output;
+public class TellerManagementUI extends javax.swing.JFrame {
+    private final TellerManager manager = new TellerManager();
 
-    public TellerManagementUI() {
-        manager = new TellerManager();
-        serviceManager = new ServiceManager();
-        setupUI();
-    }
-
-    private void setupUI() {
-        setTitle("Teller Management - Mariah");
-        setSize(600, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
-
-        output = new JTextArea();
-        output.setEditable(false);
-        add(new JScrollPane(output), BorderLayout.CENTER);
-
-        JPanel panel = new JPanel(new GridLayout(2, 3, 10, 10));
-        JButton addBtn = new JButton("Add Teller");
-        JButton removeBtn = new JButton("Remove Teller");
-        JButton editBtn = new JButton("Edit Teller");
-        JButton assignBtn = new JButton("Assign Service");
-        JButton viewBtn = new JButton("View All");
-        JButton exitBtn = new JButton("Exit");
-
-        panel.add(addBtn);
-        panel.add(removeBtn);
-        panel.add(editBtn);
-        panel.add(assignBtn);
-        panel.add(viewBtn);
-        panel.add(exitBtn);
-        add(panel, BorderLayout.SOUTH);
-
-        addBtn.addActionListener(e -> {
-            try {
-                int id = Integer.parseInt(JOptionPane.showInputDialog("Enter Teller ID:"));
-                String name = JOptionPane.showInputDialog("Enter Teller Name:");
-                manager.addTeller(id, name);
-                refreshOutput("Teller added.");
-            } catch (Exception ex) {
-                showError("Invalid input.");
-            }
-        });
-
-        removeBtn.addActionListener(e -> {
-            try {
-                int id = Integer.parseInt(JOptionPane.showInputDialog("Enter Teller ID to remove:"));
-                manager.removeTeller(id);
-                refreshOutput("Teller removed.");
-            } catch (Exception ex) {
-                showError("Invalid input.");
-            }
-        });
-
-        editBtn.addActionListener(e -> {
-            try {
-                int id = Integer.parseInt(JOptionPane.showInputDialog("Enter Teller ID to edit:"));
-                String newName = JOptionPane.showInputDialog("Enter new name:");
-                manager.editTellerName(id, newName);
-                refreshOutput("Teller name updated.");
-            } catch (Exception ex) {
-                showError("Invalid input.");
-            }
-        });
-
-        assignBtn.addActionListener(e -> {
-            try {
-                int id = Integer.parseInt(JOptionPane.showInputDialog("Enter Teller ID:"));
-
-                // Dropdown with all available service types
-                Service selected = (Service) JOptionPane.showInputDialog(
-                    this,
-                    "Select service type:",
-                    "Assign Service",
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    serviceManager.getAllServices().toArray(),
-                    null
-                );
-
-                if (selected != null) {
-                    manager.assignService(id, selected);
-                    refreshOutput("Service assigned.");
-                }
-
-            } catch (Exception ex) {
-                showError("Invalid input.");
-            }
-        });
-
-
-        viewBtn.addActionListener(e -> refreshOutput("All Tellers:"));
-        exitBtn.addActionListener(e -> System.exit(0));
-    }
-
-    private void refreshOutput(String message) {
-        StringBuilder sb = new StringBuilder(message + "\n\n");
-        for (Teller t : manager.getTellers()) {
-            sb.append(t.toString()).append("\n");
+   public TellerManagementUI() {
+        initComponents();
+        this.setLocationRelativeTo(null);
+    this.addWindowListener(new WindowAdapter() {
+        public void windowOpened(WindowEvent e) {
+            loadTellersToTable();
         }
-        output.setText(sb.toString());
+    });
     }
+    private void loadTellersToTable() {
+    try (Connection conn = DBConnection.getConnection();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery("SELECT * FROM tellers")) {
 
-    private void showError(String msg) {
-        JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        String[] columnNames = new String[columnCount];
+        for (int i = 0; i < columnCount; i++) {
+            columnNames[i] = metaData.getColumnName(i + 1);
+        }
+
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        while (rs.next()) {
+            Object[] row = new Object[columnCount];
+            for (int i = 0; i < columnCount; i++) {
+                row[i] = rs.getObject(i + 1);
+            }
+            model.addRow(row);
+        }
+
+        tellerTable.setModel(model);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error loading data: " + e.getMessage());
     }
+}
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
+@SuppressWarnings("unchecked")
+
+private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {                                       
+         if (tellerTable.getRowCount() >= 5) {
+        JOptionPane.showMessageDialog(this, "You can only add up to 5 tellers.");
+        return;
+    }
+    String name = JOptionPane.showInputDialog(this, "Enter Teller Name:");
+    String service = JOptionPane.showInputDialog(this, "Enter Service Type:");
+    if (name != null && service != null) {
+        manager.addTeller(name, service);
+        loadTellersToTable();
+    }
+}  
+    
+private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {                                        
+        try {
+        int id = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter Teller ID to Edit:"));
+        String name = JOptionPane.showInputDialog(this, "Enter New Name:");
+        String service = JOptionPane.showInputDialog(this, "Enter New Service Type:");
+        if (name != null && service != null) {
+            manager.updateTeller(id, name, service);
+            loadTellersToTable();
+        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Invalid ID.");
+    }
+}   
+
+private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {                                          
+        try {
+        int id = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter Teller ID to Delete:"));
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure?", "Confirm", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            manager.deleteTeller(id);
+            loadTellersToTable();
+        }
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "Invalid ID.");
+    }
+}  
+
+private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {                                           
+        loadTellersToTable();
+}
+
+public static void main(String args[]) {
+    java.awt.EventQueue.invokeLater(new Runnable() {
+        public void run() {
             new TellerManagementUI().setVisible(true);
-        });
-    }
+        }
+    });
+}
+
+private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnRefresh;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JTable tellerTable;
+    // End of variables declaration
 }
