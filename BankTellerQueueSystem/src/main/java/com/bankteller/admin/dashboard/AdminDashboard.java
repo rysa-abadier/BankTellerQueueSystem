@@ -1,20 +1,25 @@
-package com.bankteller.admin.dashboard;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package com.example.bankqueuesystem;
 
-import com.bankteller.admin.teller.TellerManagementUI;
-import com.bankteller.admin.service.ServiceConfigUI;
-import com.bankteller.admin.queue.QueueManagementUI;
 import java.awt.Color;
 
+/**
+ *
+ * @author HOME
+ */
 public class AdminDashboard extends javax.swing.JFrame {
 
     /**
-     * Creates new form AdminDashboard
+     * Creates new form dashboard
      */
     public AdminDashboard() {
         initComponents();
         simulateDashboardStats(); // Call method after GUI loads
     }
-
+    
     private void simulateDashboardStats() {
         new javax.swing.Timer(5000, evt -> {
             int peopleInQueue = (int) (Math.random() * 10); // 0–9
@@ -28,18 +33,9 @@ public class AdminDashboard extends javax.swing.JFrame {
             lblPeopleInQueue.setText(String.valueOf(peopleInQueue));
             lblActiveTellers.setText(String.valueOf(activeTellers));
             lblLongestWait.setText(formattedWait);
-
-            // System notification
-            if (activeTellers == 0) {
-                txtSystemNotifications.setText("No active tellers!");
-            } else if (peopleInQueue > 5) {
-                txtSystemNotifications.setText("High queue volume. Add more tellers.");
-            } else {
-                txtSystemNotifications.setText("System running normally...");
-            }
         }).start();
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -50,34 +46,63 @@ public class AdminDashboard extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel(new java.awt.GridLayout(2, 2, 15, 15));
+        jPanel2 = new javax.swing.JPanel();
+        AdminDashboardTitle = new javax.swing.JLabel();
+        navPanel = new javax.swing.JPanel();
+        btnServiceConfiguration = new javax.swing.JButton();
         btnTellerManagement = new javax.swing.JButton();
         btnReportsAndAnalytics = new javax.swing.JButton();
-        btnServiceConfiguration = new javax.swing.JButton();
         btnQueueManagement = new javax.swing.JButton();
-        jPanel4 = new javax.swing.JPanel();
+        btnLogout = new javax.swing.JButton();
+        titlePeopleInQueue = new javax.swing.JLabel();
+        titleActiveTellers = new javax.swing.JLabel();
+        titleLongestWait = new javax.swing.JLabel();
         lblPeopleInQueue = new javax.swing.JLabel();
         lblActiveTellers = new javax.swing.JLabel();
         lblLongestWait = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        txtSystemNotifications = new javax.swing.JTextArea();
-        jPanel5 = new javax.swing.JPanel();
-        jPanel6 = new javax.swing.JPanel();
-        AdminDashboardTitle = new javax.swing.JLabel();
-        btnLogout = new javax.swing.JButton();
-        titleLongestWait = new javax.swing.JLabel();
-        titleActiveTellers = new javax.swing.JLabel();
-        titleSystemNotifications = new javax.swing.JLabel();
-        titlePeopleInQueue = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setBackground(new Color(245, 245, 245));
 
-        jPanel1.setLayout(new java.awt.GridLayout(1, 0));
+        jPanel1.setBackground(new Color(245, 245, 245));
+
+        jPanel2.setBackground(new Color(38, 50, 56));
+
+        AdminDashboardTitle.setBackground(new Color(245, 245, 245));
+        AdminDashboardTitle.setFont(new java.awt.Font("Script MT Bold", 1, 48)); // NOI18N
+        AdminDashboardTitle.setForeground(new Color(245, 245, 245));
+        AdminDashboardTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        AdminDashboardTitle.setText("Admin Dashboard");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(223, 223, 223)
+                .addComponent(AdminDashboardTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 415, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(AdminDashboardTitle)
+                .addContainerGap(16, Short.MAX_VALUE))
+        );
+
+        navPanel.setBackground(new Color(207, 216, 220));
+
+        btnServiceConfiguration.setBackground(new Color(186, 104, 200));
+        btnServiceConfiguration.setFont(new java.awt.Font("Monospaced", 1, 18)); // NOI18N
+        btnServiceConfiguration.setText("🔧 Service Configuration");
+        btnServiceConfiguration.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnServiceConfigurationActionPerformed(evt);
+            }
+        });
 
         btnTellerManagement.setBackground(new Color(100, 181, 246));
-        btnTellerManagement.setFont(new java.awt.Font("Monospaced", 1, 24)); // NOI18N
+        btnTellerManagement.setFont(new java.awt.Font("Monospaced", 1, 18)); // NOI18N
         btnTellerManagement.setText("⚙ Teller Management");
         btnTellerManagement.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -86,7 +111,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         });
 
         btnReportsAndAnalytics.setBackground(new Color(255, 202, 58));
-        btnReportsAndAnalytics.setFont(new java.awt.Font("Monospaced", 1, 24)); // NOI18N
+        btnReportsAndAnalytics.setFont(new java.awt.Font("Monospaced", 1, 18)); // NOI18N
         btnReportsAndAnalytics.setText("📊 Reports & Analytics");
         btnReportsAndAnalytics.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -94,17 +119,8 @@ public class AdminDashboard extends javax.swing.JFrame {
             }
         });
 
-        btnServiceConfiguration.setBackground(new Color(186, 104, 200));
-        btnServiceConfiguration.setFont(new java.awt.Font("Monospaced", 1, 24)); // NOI18N
-        btnServiceConfiguration.setText("🔧 Service Configuration");
-        btnServiceConfiguration.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnServiceConfigurationActionPerformed(evt);
-            }
-        });
-
         btnQueueManagement.setBackground(new Color(129, 199, 132));
-        btnQueueManagement.setFont(new java.awt.Font("Monospaced", 1, 24)); // NOI18N
+        btnQueueManagement.setFont(new java.awt.Font("Monospaced", 1, 18)); // NOI18N
         btnQueueManagement.setText("🔁 Queue Management");
         btnQueueManagement.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -112,34 +128,62 @@ public class AdminDashboard extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGap(41, 41, 41)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnReportsAndAnalytics, javax.swing.GroupLayout.PREFERRED_SIZE, 363, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnTellerManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 363, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnQueueManagement, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 363, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnServiceConfiguration, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addGap(45, 45, 45))
+        btnLogout.setBackground(new Color(255, 87, 87));
+        btnLogout.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
+        btnLogout.setText("LOGOUT");
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout navPanelLayout = new javax.swing.GroupLayout(navPanel);
+        navPanel.setLayout(navPanelLayout);
+        navPanelLayout.setHorizontalGroup(
+            navPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(navPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(navPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(navPanelLayout.createSequentialGroup()
+                        .addGroup(navPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnTellerManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnServiceConfiguration))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(btnReportsAndAnalytics, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnQueueManagement, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+            .addGroup(navPanelLayout.createSequentialGroup()
+                .addGap(102, 102, 102)
+                .addComponent(btnLogout)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnServiceConfiguration, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnTellerManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnQueueManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnReportsAndAnalytics, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(26, 26, 26))
+        navPanelLayout.setVerticalGroup(
+            navPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(navPanelLayout.createSequentialGroup()
+                .addGap(50, 50, 50)
+                .addComponent(btnTellerManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnServiceConfiguration)
+                .addGap(18, 18, 18)
+                .addComponent(btnReportsAndAnalytics, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnQueueManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(46, 46, 46)
+                .addComponent(btnLogout)
+                .addContainerGap(40, Short.MAX_VALUE))
         );
+
+        titlePeopleInQueue.setFont(new java.awt.Font("Rockwell Condensed", 1, 18)); // NOI18N
+        titlePeopleInQueue.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        titlePeopleInQueue.setText("People in Queue");
+
+        titleActiveTellers.setFont(new java.awt.Font("Rockwell Condensed", 1, 18)); // NOI18N
+        titleActiveTellers.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        titleActiveTellers.setText("Active Tellers");
+
+        titleLongestWait.setFont(new java.awt.Font("Rockwell Condensed", 1, 18)); // NOI18N
+        titleLongestWait.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        titleLongestWait.setText("Longest Wait Time");
 
         lblPeopleInQueue.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
         lblPeopleInQueue.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -153,177 +197,86 @@ public class AdminDashboard extends javax.swing.JFrame {
         lblLongestWait.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblLongestWait.setText("loading..");
 
-        txtSystemNotifications.setColumns(20);
-        txtSystemNotifications.setFont(new java.awt.Font("Rockwell", 0, 18)); // NOI18N
-        txtSystemNotifications.setRows(5);
-        jScrollPane1.setViewportView(txtSystemNotifications);
-
-        jScrollPane2.setViewportView(jScrollPane1);
-
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(45, 45, 45)
-                .addComponent(lblPeopleInQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(50, 50, 50)
-                .addComponent(lblActiveTellers, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(42, 42, 42)
-                .addComponent(lblLongestWait, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24))
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(navPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(titlePeopleInQueue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblPeopleInQueue, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(titleActiveTellers, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblActiveTellers, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(titleLongestWait, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblLongestWait, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane2)
-                .addGap(13, 13, 13))
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(31, 31, 31)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblLongestWait, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblActiveTellers, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblPeopleInQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(42, 42, 42)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(titlePeopleInQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(titleActiveTellers, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(titleLongestWait, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(50, 50, 50)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblPeopleInQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblActiveTellers, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblLongestWait, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(navPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
         );
-
-        jPanel5.setLayout(new java.awt.GridLayout(1, 0));
-
-        AdminDashboardTitle.setBackground(new Color(230, 230, 230));
-        AdminDashboardTitle.setFont(new java.awt.Font("Script MT Bold", 1, 48)); // NOI18N
-        AdminDashboardTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        AdminDashboardTitle.setText("Admin Dashboard");
-
-        btnLogout.setBackground(new Color(255, 87, 87));
-        btnLogout.setFont(new java.awt.Font("Segoe UI Black", 0, 14)); // NOI18N
-        btnLogout.setText("LOGOUT");
-        btnLogout.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnLogoutActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnLogout)
-                .addContainerGap())
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGap(253, 253, 253)
-                .addComponent(AdminDashboardTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 415, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(AdminDashboardTitle)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnLogout)
-                .addContainerGap())
-        );
-
-        titleLongestWait.setFont(new java.awt.Font("Rockwell Condensed", 1, 18)); // NOI18N
-        titleLongestWait.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        titleLongestWait.setText("Longest Wait Time");
-
-        titleActiveTellers.setFont(new java.awt.Font("Rockwell Condensed", 1, 18)); // NOI18N
-        titleActiveTellers.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        titleActiveTellers.setText("Active Tellers");
-
-        titleSystemNotifications.setFont(new java.awt.Font("Rockwell Condensed", 1, 18)); // NOI18N
-        titleSystemNotifications.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        titleSystemNotifications.setText("System Notifications");
-
-        titlePeopleInQueue.setFont(new java.awt.Font("Rockwell Condensed", 1, 18)); // NOI18N
-        titlePeopleInQueue.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        titlePeopleInQueue.setText("People in Queue");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(64, 64, 64)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(titlePeopleInQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, 0)
-                        .addComponent(titleActiveTellers, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, 0)
-                        .addComponent(titleLongestWait, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, 0)
-                        .addComponent(titleSystemNotifications, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(197, 197, 197)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(206, 206, 206)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(34, 34, 34)
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(54, 54, 54)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(titlePeopleInQueue)
-                    .addComponent(titleActiveTellers)
-                    .addComponent(titleLongestWait)
-                    .addComponent(titleSystemNotifications))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(118, 118, 118))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)))
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(83, 83, 83))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
-        this.dispose(); // Close AdminDashboard
-    }//GEN-LAST:event_btnLogoutActionPerformed
-
     private void btnTellerManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTellerManagementActionPerformed
-        new TellerManagementUI().setVisible(true);
+        new TellerManagement().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnTellerManagementActionPerformed
 
     private void btnServiceConfigurationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnServiceConfigurationActionPerformed
-        new ServiceConfigUI().setVisible(true);
+        new ServiceConfiguration().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnServiceConfigurationActionPerformed
 
+    private void btnReportsAndAnalyticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportsAndAnalyticsActionPerformed
+        new ReportsAndAnalytics().setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_btnReportsAndAnalyticsActionPerformed
+
     private void btnQueueManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQueueManagementActionPerformed
-        new QueueManagementUI().setVisible(true);
+        new QueueManagement().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnQueueManagementActionPerformed
 
-    private void btnReportsAndAnalyticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportsAndAnalyticsActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnReportsAndAnalyticsActionPerformed
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
+        this.dispose(); // Close AdminDashboard
+    }//GEN-LAST:event_btnLogoutActionPerformed
 
     /**
      * @param args the command line arguments
@@ -369,18 +322,12 @@ public class AdminDashboard extends javax.swing.JFrame {
     private javax.swing.JButton btnTellerManagement;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblActiveTellers;
     private javax.swing.JLabel lblLongestWait;
     private javax.swing.JLabel lblPeopleInQueue;
+    private javax.swing.JPanel navPanel;
     private javax.swing.JLabel titleActiveTellers;
     private javax.swing.JLabel titleLongestWait;
     private javax.swing.JLabel titlePeopleInQueue;
-    private javax.swing.JLabel titleSystemNotifications;
-    private javax.swing.JTextArea txtSystemNotifications;
     // End of variables declaration//GEN-END:variables
 }
