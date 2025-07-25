@@ -1,15 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
-package com.example.bankqueuesystem;
+package com.bankteller.admin.dashboard;
 
+import com.bankteller.admin.analytics.*;
+import com.bankteller.admin.queue.*;
+import com.bankteller.admin.teller.*;
+import com.bankteller.admin.service.*;
 import java.awt.Color;
 
-/**
- *
- * @author HOME
- */
 public class AdminDashboard extends javax.swing.JFrame {
 
     /**
@@ -255,22 +251,22 @@ public class AdminDashboard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnTellerManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTellerManagementActionPerformed
-        new TellerManagement().setVisible(true);
+        new TellerManagementUI().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnTellerManagementActionPerformed
 
     private void btnServiceConfigurationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnServiceConfigurationActionPerformed
-        new ServiceConfiguration().setVisible(true);
+        new ServiceConfigurationUI().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnServiceConfigurationActionPerformed
 
     private void btnReportsAndAnalyticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportsAndAnalyticsActionPerformed
-        new ReportsAndAnalytics().setVisible(true);
+        new ReportsPanelUI().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnReportsAndAnalyticsActionPerformed
 
     private void btnQueueManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQueueManagementActionPerformed
-        new QueueManagement().setVisible(true);
+        new QueueManagementUI().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnQueueManagementActionPerformed
 

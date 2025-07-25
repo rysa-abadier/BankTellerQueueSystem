@@ -6,7 +6,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 public class QueueManagementUI extends javax.swing.JFrame {
-    private DBConnetion db = new DBConnetion();
+    private DBConnection db = new DBConnection();
     private Connection conn;
     
     private int selectedQueueNum = -1;
