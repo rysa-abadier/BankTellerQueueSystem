@@ -1,9 +1,13 @@
 package com.bankteller.admin.service;
 
+import com.bankteller.admin.queue.DBConnetion;
+
 public class Service {
+    public DBConnetion db = new DBConnetion();
+    
     private int id;
     private String name;
-    private String priority;
+    private int priority;
     private int avgServiceTime;
 
     public Service(int id, String name) {
@@ -27,11 +31,11 @@ public class Service {
         this.name = name;
     }
 
-    public String getPriority() {
+    public int getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
     }
 
@@ -41,5 +45,10 @@ public class Service {
 
     public void setAvgServiceTime(int avgServiceTime) {
         this.avgServiceTime = avgServiceTime;
+    }
+    
+    @Override
+    public String toString() {
+        return "Service ID: " + id + " | Service: " + name + " | Priority: " + priority + " | Avg Service Time: " + avgServiceTime + " minutes";
     }
 }

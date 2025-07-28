@@ -1,212 +1,12 @@
 package com.bankteller.admin.queue;
 
-import java.awt.Font;
-import java.sql.*;
-import javax.swing.*;
-import javax.swing.table.*;
-
 public class QueueManagementUI extends javax.swing.JFrame {
-    private DBConnection db = new DBConnection();
-    private Connection conn;
-    
-    private int selectedQueueNum = -1;
-    
-    private Font placeholder = new Font("Yu Gothic", Font.ITALIC, 14);
-    private Font data = new Font("Yu Gothic", Font.PLAIN, 14);
-    
+
     /**
      * Creates new form QueueManagementUI
      */
     public QueueManagementUI() {
         initComponents();
-        
-        setLocationRelativeTo(null);
-        
-        refreshData();
-        
-        setUpSelectionListener(tblQueue);
-        setUpSelectionListener(tblActive1);
-        setUpSelectionListener(tblActive2);
-        setUpSelectionListener(tblActive3);
-        setUpSelectionListener(tblActive4);
-        setUpSelectionListener(tblActive5);
-        setUpSelectionListener(tblCompleted1);
-        setUpSelectionListener(tblCompleted2);
-        setUpSelectionListener(tblCompleted3);
-        setUpSelectionListener(tblCompleted4);
-        setUpSelectionListener(tblCompleted5);
-    }
-    
-    private void refreshData() {
-        try {
-            conn = db.connect();
-
-            Statement stmt = conn.createStatement();
-            ResultSet rs;
-            DefaultTableModel model;
-            
-            // Active Customers
-            for (int i = 0; i < 5; i++) {
-                model = activeTellerTable(i);
-                model.setRowCount(0);
-                
-                rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Active' AND teller_id = " + (i+1));
-                
-                while (rs.next()) {
-                    model.addRow(new Object[]{
-                        rs.getInt("queue_no")
-                    });
-                }
-            }
-            
-            // Completed Customers
-            for (int i = 0; i < 5; i++) {
-                model = completedTellerTable(i);
-                model.setRowCount(0);
-                
-                rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Completed' AND teller_id = " + (i+1));
-                
-                while (rs.next()) {
-                    model.addRow(new Object[]{
-                        rs.getInt("queue_no")
-                    });
-                }
-            }
-            
-            // Queued Customers
-            model = (DefaultTableModel) tblQueue.getModel();
-            model.setRowCount(0);
-            
-            String[] statuses = {"Queued", "Reassigned", "Skipped"};
-            
-            String[] emergencies = {"Yes", "NO"};
-            
-            for (String emergency: emergencies) {
-                for (String status: statuses) {
-                    rs = stmt.executeQuery("SELECT * FROM customers WHERE emergency = '" + emergency + "' AND status = '" + status + "'");
-
-                    while (rs.next()) {
-                        model.addRow(new Object[]{
-                            rs.getInt("teller_id"),
-                            rs.getInt("queue_no"),
-                            rs.getString("status")
-                        });
-                    }
-                }
-            }
-            
-            viewQueue.setText("0");
-            viewName.setText("None Selected");
-            viewService.setText("None Selected");
-            viewStatus.setText("None Selected");
-            viewTeller.setText("None Selected");
-            chkEmergency.setSelected(false);
-            viewStart.setText("None Selected");
-            viewEnd.setText("None Selected");
-            
-            viewName.setFont(placeholder);
-            viewQueue.setFont(placeholder);
-            viewService.setFont(placeholder);
-            viewStatus.setFont(placeholder);
-            viewTeller.setFont(placeholder);
-            viewStart.setFont(placeholder);
-            viewEnd.setFont(placeholder);
-            
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private DefaultTableModel activeTellerTable(int num)  {
-        DefaultTableModel[] active = new DefaultTableModel[] {
-            (DefaultTableModel) tblActive1.getModel(),
-            (DefaultTableModel) tblActive2.getModel(),
-            (DefaultTableModel) tblActive3.getModel(),
-            (DefaultTableModel) tblActive4.getModel(),
-            (DefaultTableModel) tblActive5.getModel()
-        };
-        
-        return active[num];
-    }
-    
-    private DefaultTableModel completedTellerTable(int num)  {
-        DefaultTableModel[] completed = new DefaultTableModel[] {
-            (DefaultTableModel) tblCompleted1.getModel(),
-            (DefaultTableModel) tblCompleted2.getModel(),
-            (DefaultTableModel) tblCompleted3.getModel(),
-            (DefaultTableModel) tblCompleted4.getModel(),
-            (DefaultTableModel) tblCompleted5.getModel()
-        };
-        
-        return completed[num];
-    }
-    
-    private void setUpSelectionListener(JTable table) {
-        table.getSelectionModel().addListSelectionListener(event -> {
-            int row = table.getSelectedRow();
-            
-            if (row >= 0) {
-                try {
-                    if (table == tblQueue) selectedQueueNum = (int) table.getValueAt(row, 1);
-                    else selectedQueueNum = (int) table.getValueAt(row, 0);
-                    
-                    conn = db.connect();
-
-                    Statement stmt = conn.createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE transaction_date = '2025-07-22' AND queue_no = " + selectedQueueNum);
-                    
-                    if (rs.next()) {
-                        int tellerId = rs.getInt("teller_id");
-                        int serviceId = rs.getInt("service_id");
-                        String status = rs.getString("status");
-                        
-                        viewQueue.setText(Integer.toString(rs.getInt("queue_no")));
-                        viewName.setText(rs.getString("name"));
-                        viewStatus.setText(status);
-                        boolean check = "Yes".equals(rs.getString("emergency"));
-                        chkEmergency.setSelected(check);
-                        
-                        if (rs.getTime("start_time") == null) {
-                            viewStart.setText("Still in Queue");
-                            viewEnd.setText("Still in Queue");
-                        } else {
-                            viewStart.setText(rs.getTime("start_time").toString());
-                            
-                            if (!status.equalsIgnoreCase("Reassigned") || !status.equalsIgnoreCase("Skipped")) {
-                                if (rs.getTime("end_time") == null) {
-                                    viewEnd.setText("In Progress");
-                                } else viewEnd.setText(rs.getTime("end_time").toString());
-                            } else viewEnd.setText("Incomplete");
-                        }
-                        
-                        ResultSet tellerSQL = stmt.executeQuery("SELECT * FROM tellers WHERE id = " + tellerId);
-                        if (tellerSQL.next()) {
-                            viewTeller.setText(tellerSQL.getString("first_name") + " " + tellerSQL.getString("last_name"));
-                        }
-                        
-                        ResultSet serviceSQL = stmt.executeQuery("SELECT * FROM services WHERE id = " + serviceId);
-                        if (serviceSQL.next()) {
-                            viewService.setText(serviceSQL.getString("name"));
-                        }
-                        
-                        viewName.setFont(data);
-                        viewQueue.setFont(data);
-                        viewService.setFont(data);
-                        viewStatus.setFont(data);
-                        viewTeller.setFont(data);
-                        viewStart.setFont(data);
-                        viewEnd.setFont(data);
-                    }
-                    
-                    conn.close();
-                    
-                    table.clearSelection();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
     /**
@@ -255,15 +55,11 @@ public class QueueManagementUI extends javax.swing.JFrame {
         lblEmergency = new javax.swing.JLabel();
         btnReassign = new javax.swing.JButton();
         btnSkip = new javax.swing.JButton();
-        viewQueue = new javax.swing.JLabel();
-        viewTeller = new javax.swing.JLabel();
-        viewName = new javax.swing.JLabel();
-        viewService = new javax.swing.JLabel();
-        viewStatus = new javax.swing.JLabel();
-        lblStart = new javax.swing.JLabel();
-        lblEnd = new javax.swing.JLabel();
-        viewStart = new javax.swing.JLabel();
-        viewEnd = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -679,53 +475,29 @@ public class QueueManagementUI extends javax.swing.JFrame {
 
         btnReassign.setFont(new java.awt.Font("Yu Gothic", 0, 12)); // NOI18N
         btnReassign.setText("REASSIGN");
-        btnReassign.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnReassignActionPerformed(evt);
-            }
-        });
 
         btnSkip.setFont(new java.awt.Font("Yu Gothic", 0, 12)); // NOI18N
         btnSkip.setText("SKIP");
-        btnSkip.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSkipActionPerformed(evt);
-            }
-        });
 
-        viewQueue.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
-        viewQueue.setText("0");
-        viewQueue.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel1.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
+        jLabel1.setText("0");
+        jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
-        viewTeller.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
-        viewTeller.setText("None Selected");
-        viewTeller.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel2.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
+        jLabel2.setText("Teller");
+        jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
-        viewName.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
-        viewName.setText("None Selected");
-        viewName.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel3.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
+        jLabel3.setText("Name");
+        jLabel3.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
-        viewService.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
-        viewService.setText("None Selected");
-        viewService.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel4.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
+        jLabel4.setText("Deposit");
+        jLabel4.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
-        viewStatus.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
-        viewStatus.setText("None Selected");
-        viewStatus.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-
-        lblStart.setFont(new java.awt.Font("Yu Gothic", 3, 14)); // NOI18N
-        lblStart.setText("Start Time:");
-
-        lblEnd.setFont(new java.awt.Font("Yu Gothic", 3, 14)); // NOI18N
-        lblEnd.setText("End Time:");
-
-        viewStart.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
-        viewStart.setText("None Selected");
-        viewStart.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-
-        viewEnd.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
-        viewEnd.setText("None Selected");
-        viewEnd.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel5.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
+        jLabel5.setText("Queued");
+        jLabel5.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
         javax.swing.GroupLayout pnlDetailsLayout = new javax.swing.GroupLayout(pnlDetails);
         pnlDetails.setLayout(pnlDetailsLayout);
@@ -735,20 +507,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDetailsLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDetailsLayout.createSequentialGroup()
-                                .addComponent(lblQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(viewQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDetailsLayout.createSequentialGroup()
-                                .addComponent(btnReassign)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(btnSkip))))
-                    .addGroup(pnlDetailsLayout.createSequentialGroup()
                         .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(lblEnd, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblStart, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblEmergency, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblService, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -761,12 +520,21 @@ public class QueueManagementUI extends javax.swing.JFrame {
                             .addGroup(pnlDetailsLayout.createSequentialGroup()
                                 .addComponent(chkEmergency, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(viewName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(viewTeller, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(viewService, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(viewStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(viewStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(viewEnd, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDetailsLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDetailsLayout.createSequentialGroup()
+                                .addComponent(lblQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDetailsLayout.createSequentialGroup()
+                                .addComponent(btnReassign)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(btnSkip)))))
                 .addContainerGap())
         );
         pnlDetailsLayout.setVerticalGroup(
@@ -774,36 +542,28 @@ public class QueueManagementUI extends javax.swing.JFrame {
             .addGroup(pnlDetailsLayout.createSequentialGroup()
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblQueue)
-                    .addComponent(viewQueue))
+                    .addComponent(jLabel1))
                 .addGap(18, 18, 18)
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblTeller)
-                    .addComponent(viewTeller))
+                    .addComponent(jLabel2))
                 .addGap(18, 18, 18)
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblName)
-                    .addComponent(viewName))
+                    .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblService)
-                    .addComponent(viewService))
+                    .addComponent(jLabel4))
                 .addGap(18, 18, 18)
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
-                    .addComponent(viewStatus))
+                    .addComponent(jLabel5))
                 .addGap(18, 18, 18)
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkEmergency)
                     .addComponent(lblEmergency))
-                .addGap(18, 18, 18)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblStart)
-                    .addComponent(viewStart))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblEnd)
-                    .addComponent(viewEnd))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnReassign)
                     .addComponent(btnSkip))
@@ -830,10 +590,10 @@ public class QueueManagementUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(tabCustomers, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlQueueMgmtLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlQueue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                .addGroup(pnlQueueMgmtLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(pnlDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlQueue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(11, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -851,189 +611,8 @@ public class QueueManagementUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void chkEmergencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkEmergencyActionPerformed
-        try {
-            conn = db.connect();
-            
-            int confirm = JOptionPane.showConfirmDialog(this, "Change customer emergency status?", "Emergency Customer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null);
-            
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE transaction_date = '2025-07-22' AND queue_no = " + selectedQueueNum);
-            
-            int id = 0;
-            String emergency = "";
-            
-            if (rs.next()) {
-                id = rs.getInt("id");
-                emergency = rs.getString("emergency").equalsIgnoreCase("Yes") ? "No" : "Yes";
-                
-                if (rs.getString("status").equalsIgnoreCase("Completed")) {
-                    JOptionPane.showMessageDialog(this, "Cannot change emergency status of completed customers!");
-                    refreshData();
-                    return;
-                } 
-            }
-            
-            if (confirm == JOptionPane.YES_OPTION) {
-                String sql = "UPDATE customers SET emergency = ? WHERE id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-
-                pstmt.setString(1, emergency);
-                pstmt.setInt(2, id);
-
-                int rows = pstmt.executeUpdate();
-                if (rows > 0) {
-                    JOptionPane.showMessageDialog(this, "Customer updated successfully!");
-                }
-                
-                refreshData();
-            } else JOptionPane.showMessageDialog(this, "Customer update cancelled!");
-            
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
-        }
+        // TODO add your handling code here:
     }//GEN-LAST:event_chkEmergencyActionPerformed
-
-    private void btnReassignActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReassignActionPerformed
-        if (selectedQueueNum == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a customer to reassign.");
-            return;
-        }
-        
-        try {            
-            conn = db.connect();
-
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE transaction_date = '2025-07-22' AND queue_no = " + selectedQueueNum);
-            
-            int id = 0;
-            int teller = -1;
-            int service = 0;
-            String name = "";
-            String status = "";
-            String tellerName = "";
-            String serviceName = "";
-            
-            String[] options = new String[5];
-
-            if (rs.next()) {
-                int tellerId = rs.getInt("teller_id");
-                int serviceId = rs.getInt("service_id");
-                
-                id = rs.getInt("id");
-                name = rs.getString("name");
-                status = rs.getString("status");
-
-                rs = stmt.executeQuery("SELECT * FROM tellers WHERE id = " + tellerId);
-                if (rs.next()) {
-                    tellerName = rs.getString("first_name") + " " + rs.getString("last_name");
-                }
-
-                rs = stmt.executeQuery("SELECT * FROM services WHERE id = " + serviceId);
-                if (rs.next()) {
-                    serviceName = rs.getString("name");
-                }
-                
-                if (status.equals("Completed")) {
-                    JOptionPane.showMessageDialog(this, "Completed customers cannot be reassigned!");
-                    return;
-                }
-            }
-            
-            for (int i = 0; i < 5; i++) {
-                StringBuilder sb = new StringBuilder("Teller ");
-                sb.append((i+1));
-                sb.append(" - ");
-                
-                rs = stmt.executeQuery("SELECT * FROM tellers WHERE id = " + (i+1));
-                if (rs.next()) service = rs.getInt("service_id");
-                
-                rs = stmt.executeQuery("SELECT * FROM services WHERE id = " + service);
-                
-                if (rs.next()) {
-                    sb.append(rs.getString("name"));
-                }
-                
-                options[i] = sb.toString();
-            }
-            
-            Object selected = JOptionPane.showInputDialog(this, "Queue No.: " + selectedQueueNum + "\nAssigned Teller: " + tellerName + "\n\nCustomer Name: " + name + "\nService: " + serviceName + "\n", "Reassign Customer", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-            
-            if (selected != null) {
-                for (int i = 0; i < options.length; i++) {
-                    if (options[i].equals(selected.toString())) {
-                        teller = (i+1);
-                    }
-                }
-
-                String sql = "UPDATE customers SET teller_id = ?, status = 'Reassigned' WHERE id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-
-                pstmt.setInt(1, teller);
-                pstmt.setInt(2, id);
-
-                int rows = pstmt.executeUpdate();
-                if (rows > 0) {
-                    JOptionPane.showMessageDialog(this, "Customer reassigned successfully!");
-                }
-                
-                refreshData();
-            } else JOptionPane.showMessageDialog(this, "Customer reassignment cancelled!");
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
-        }
-    }//GEN-LAST:event_btnReassignActionPerformed
-
-    private void btnSkipActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSkipActionPerformed
-        if (selectedQueueNum == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a customer to skip.");
-            return;
-        }
-        
-        try {
-            conn = db.connect();
-            
-            int confirm = JOptionPane.showConfirmDialog(this, "Confirm to skip customer?", "Skip Customer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null);
-            
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE transaction_date = '2025-07-22' AND queue_no = " + selectedQueueNum);
-            
-            int id = 0;
-            String emergency = "";
-            
-            if (rs.next()) {
-                id = rs.getInt("id");
-                emergency = rs.getString("emergency");
-                
-                if (emergency.equalsIgnoreCase("Yes")) {
-                    JOptionPane.showMessageDialog(this, "Customers with the emergency status cannot be skipped!");
-                    return;
-                }
-            }
-            
-            if (confirm == JOptionPane.YES_OPTION) {
-                String sql = "UPDATE customers SET status = 'Skipped' WHERE id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-
-                pstmt.setInt(1, id);
-
-                int rows = pstmt.executeUpdate();
-                if (rows > 0) {
-                    JOptionPane.showMessageDialog(this, "Customer skipped successfully!");
-                }
-                
-                refreshData();
-            } else JOptionPane.showMessageDialog(this, "Skipping customer uncessfull!");
-            
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
-        }
-    }//GEN-LAST:event_btnSkipActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1074,12 +653,15 @@ public class QueueManagementUI extends javax.swing.JFrame {
     private javax.swing.JButton btnReassign;
     private javax.swing.JButton btnSkip;
     private javax.swing.JCheckBox chkEmergency;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel lblEmergency;
-    private javax.swing.JLabel lblEnd;
     private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblQueue;
     private javax.swing.JLabel lblService;
-    private javax.swing.JLabel lblStart;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JLabel lblTeller;
     private javax.swing.JPanel pnlActive;
@@ -1110,12 +692,5 @@ public class QueueManagementUI extends javax.swing.JFrame {
     private javax.swing.JTable tblCompleted4;
     private javax.swing.JTable tblCompleted5;
     private javax.swing.JTable tblQueue;
-    private javax.swing.JLabel viewEnd;
-    private javax.swing.JLabel viewName;
-    private javax.swing.JLabel viewQueue;
-    private javax.swing.JLabel viewService;
-    private javax.swing.JLabel viewStart;
-    private javax.swing.JLabel viewStatus;
-    private javax.swing.JLabel viewTeller;
     // End of variables declaration//GEN-END:variables
 }
