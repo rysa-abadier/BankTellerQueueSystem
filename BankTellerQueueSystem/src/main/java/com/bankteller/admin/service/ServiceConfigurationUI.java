@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
 package com.bankteller.admin.service;
 
 import com.bankteller.admin.dashboard.AdminDashboard;
@@ -5,6 +9,10 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import javax.swing.*;
 
+/**
+ *
+ * @author Noah Peñaranda
+ */
 public class ServiceConfigurationUI extends javax.swing.JFrame {
     private ServiceManager manager = new ServiceManager();
     /**
@@ -34,16 +42,20 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         btnAdd = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
-        btnExit = new javax.swing.JButton();
+        btnDashboard = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(600, 450));
 
         lblTitle.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
         lblTitle.setText("Service Configuration");
 
         tblServices.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
             },
             new String [] {
                 "ID", "Name", "Priority", "Average Service Time"
@@ -51,6 +63,9 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tblServices);
         if (tblServices.getColumnModel().getColumnCount() > 0) {
+            tblServices.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tblServices.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tblServices.getColumnModel().getColumn(2).setPreferredWidth(100);
             tblServices.getColumnModel().getColumn(3).setPreferredWidth(200);
         }
 
@@ -75,10 +90,10 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
             }
         });
 
-        btnExit.setText("Back to Dashboard");
-        btnExit.addActionListener(new java.awt.event.ActionListener() {
+        btnDashboard.setText("Dashboard");
+        btnDashboard.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnExitActionPerformed(evt);
+                btnDashboardActionPerformed(evt);
             }
         });
 
@@ -86,12 +101,8 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(lblTitle)
-                .addGap(140, 140, 140))
             .addGroup(layout.createSequentialGroup()
-                .addGap(55, 55, 55)
+                .addGap(72, 72, 72)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnAdd)
@@ -100,9 +111,13 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(btnDelete)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnExit))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 483, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(62, Short.MAX_VALUE))
+                        .addComponent(btnDashboard))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(76, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblTitle)
+                .addGap(143, 143, 143))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -110,14 +125,14 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(lblTitle)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 298, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAdd)
                     .addComponent(btnEdit)
                     .addComponent(btnDelete)
-                    .addComponent(btnExit))
-                .addContainerGap(31, Short.MAX_VALUE))
+                    .addComponent(btnDashboard))
+                .addContainerGap(58, Short.MAX_VALUE))
         );
 
         pack();
@@ -250,14 +265,14 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         loadTableData();
     }//GEN-LAST:event_btnDeleteActionPerformed
 
-    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
+    private void btnDashboardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDashboardActionPerformed
         // TODO add your handling code here:
         setVisible(false);
         dispose();
         
         AdminDashboard adminDashboard = new AdminDashboard();
         adminDashboard.setVisible(true);
-    }//GEN-LAST:event_btnExitActionPerformed
+    }//GEN-LAST:event_btnDashboardActionPerformed
 
     /**
      * @param args the command line arguments
@@ -296,9 +311,9 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
+    private javax.swing.JButton btnDashboard;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnEdit;
-    private javax.swing.JButton btnExit;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JTable tblServices;

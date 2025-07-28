@@ -1,4 +1,4 @@
-package com.example.tellermanagement;
+package com.bankteller.admin.teller;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.WindowAdapter;

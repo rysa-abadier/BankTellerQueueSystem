@@ -1,4 +1,4 @@
-package com.example.tellermanagement;
+package com.bankteller.admin.teller;
 
 public class Teller {
     private int id;
