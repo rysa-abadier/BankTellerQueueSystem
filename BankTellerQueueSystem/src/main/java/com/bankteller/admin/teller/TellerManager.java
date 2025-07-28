@@ -1,8 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package com.example.tellermanagement;
+package com.bankteller.admin.teller;
+import com.bankteller.admin.queue.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 /**
@@ -10,9 +7,11 @@ import java.util.ArrayList;
  * @author Mariah
  */
 public class TellerManager {
+    public DBConnection db = new DBConnection();
+
      public ArrayList<Teller> getAllTellers() {
         ArrayList<Teller> list = new ArrayList<>();
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = db.connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM tellers")) {
 
@@ -30,7 +29,7 @@ public class TellerManager {
     }
 
     public void addTeller(String name, String serviceType) {
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = db.connect();
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO tellers (name, service_type) VALUES (?, ?)")) {
             stmt.setString(1, name);
@@ -42,7 +41,7 @@ public class TellerManager {
     }
 
     public void updateTeller(int id, String name, String serviceType) {
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = db.connect();
              PreparedStatement stmt = conn.prepareStatement(
                      "UPDATE tellers SET name=?, service_type=? WHERE id=?")) {
             stmt.setString(1, name);
@@ -55,7 +54,7 @@ public class TellerManager {
     }
 
     public void deleteTeller(int id) {
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = db.connect();
              PreparedStatement stmt = conn.prepareStatement(
                      "DELETE FROM tellers WHERE id=?")) {
             stmt.setInt(1, id);
