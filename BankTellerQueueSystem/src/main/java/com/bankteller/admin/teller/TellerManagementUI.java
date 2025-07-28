@@ -1,15 +1,14 @@
 package com.bankteller.admin.teller;
+import com.bankteller.admin.queue.DBConnection;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
+import java.sql.*;
 
 public class TellerManagementUI extends javax.swing.JFrame {
     private final TellerManager manager = new TellerManager();
+    public DBConnection db = new DBConnection();
 
    public TellerManagementUI() {
         initComponents();
@@ -21,7 +20,7 @@ public class TellerManagementUI extends javax.swing.JFrame {
     });
     }
     private void loadTellersToTable() {
-    try (Connection conn = DBConnection.getConnection();
+    try (Connection conn = db.connect();
          Statement stmt = conn.createStatement();
          ResultSet rs = stmt.executeQuery("SELECT * FROM tellers")) {
 

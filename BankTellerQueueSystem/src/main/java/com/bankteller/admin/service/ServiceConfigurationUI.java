@@ -140,14 +140,14 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
 
     private void loadTableData() {
         javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
-        model.setRowCount(0);
-        
+        model.setRowCount(0); // Clear table first
+
         ArrayList<Service> services = manager.getAllServices();
         for (Service s : services) {
             model.addRow(new Object[]{s.getId(), s.getName(), s.getPriority(), s.getAvgServiceTime()});
         }
     }
-    
+
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         // TODO add your handling code here:
         JTextField nameField = new JTextField();
@@ -180,12 +180,18 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
             try {
                 int avgTime = Integer.parseInt(avgTimeText);
 
-                // Generate next ID (naive but works)
-                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
-                int nextId = model.getRowCount() + 1;
+//                // Generate next ID (naive but works)
+//                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
+//                int nextId = model.getRowCount() + 1;
+//
+//                // Add to table
+//                model.addRow(new Object[]{nextId, name, priority, avgTime});
 
-                // Add to table
-                model.addRow(new Object[]{nextId, name, priority, avgTime});
+                Service s = new Service(0, name);
+                s.setPriority(priority);
+                s.setAvgServiceTime(avgTime);
+                manager.addService(s);
+
 
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "Average Service Time must be numbers.");
@@ -238,9 +244,16 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
             try {
                 int avgTime = Integer.parseInt(avgTimeText);
                 
-                model.setValueAt(name, selectedRow, 1);
-                model.setValueAt(priority, selectedRow, 2);
-                model.setValueAt(avgTime, selectedRow, 3);
+//                model.setValueAt(name, selectedRow, 1);
+//                model.setValueAt(priority, selectedRow, 2);
+//                model.setValueAt(avgTime, selectedRow, 3);
+
+                int id = (int) model.getValueAt(selectedRow, 0);
+                Service updated = new Service(id, name);
+                updated.setPriority(priority);
+                updated.setAvgServiceTime(avgTime);
+                manager.updateService(updated);
+
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "Average Service Time must be numbers.");
             }
@@ -260,7 +273,10 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this service?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
-            model.removeRow(selectedRow);
+//            model.removeRow(selectedRow);
+            int id = (int) tblServices.getValueAt(selectedRow, 0);
+            manager.removeService(id);
+
         }
         loadTableData();
     }//GEN-LAST:event_btnDeleteActionPerformed
