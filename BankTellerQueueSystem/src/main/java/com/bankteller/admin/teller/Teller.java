@@ -4,6 +4,10 @@
  */
 package com.bankteller.admin.teller;
 
+/**
+ *
+ * @author Mariah
+ */
 public class Teller {
     private int id;
     private String name;
@@ -19,4 +23,3 @@ public class Teller {
     public String getName() { return name; }
     public String getServiceType() { return serviceType; }
 }
-
