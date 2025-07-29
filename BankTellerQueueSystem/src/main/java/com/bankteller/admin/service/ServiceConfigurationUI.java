@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package com.bankteller.admin.service;
 
 import com.bankteller.admin.dashboard.AdminDashboard;
@@ -9,10 +5,6 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import javax.swing.*;
 
-/**
- *
- * @author Noah Peñaranda
- */
 public class ServiceConfigurationUI extends javax.swing.JFrame {
     private ServiceManager manager = new ServiceManager();
     /**
@@ -42,20 +34,16 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         btnAdd = new javax.swing.JButton();
         btnEdit = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
-        btnDashboard = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(600, 450));
 
         lblTitle.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
         lblTitle.setText("Service Configuration");
 
         tblServices.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
                 "ID", "Name", "Priority", "Average Service Time"
@@ -63,9 +51,6 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tblServices);
         if (tblServices.getColumnModel().getColumnCount() > 0) {
-            tblServices.getColumnModel().getColumn(0).setPreferredWidth(50);
-            tblServices.getColumnModel().getColumn(1).setPreferredWidth(100);
-            tblServices.getColumnModel().getColumn(2).setPreferredWidth(100);
             tblServices.getColumnModel().getColumn(3).setPreferredWidth(200);
         }
 
@@ -90,10 +75,10 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
             }
         });
 
-        btnDashboard.setText("Dashboard");
-        btnDashboard.addActionListener(new java.awt.event.ActionListener() {
+        btnExit.setText("Back to Dashboard");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDashboardActionPerformed(evt);
+                btnExitActionPerformed(evt);
             }
         });
 
@@ -101,8 +86,12 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblTitle)
+                .addGap(140, 140, 140))
             .addGroup(layout.createSequentialGroup()
-                .addGap(72, 72, 72)
+                .addGap(55, 55, 55)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnAdd)
@@ -111,13 +100,9 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(btnDelete)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnDashboard))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(76, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(lblTitle)
-                .addGap(143, 143, 143))
+                        .addComponent(btnExit))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 483, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(62, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -125,14 +110,14 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(lblTitle)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 298, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAdd)
                     .addComponent(btnEdit)
                     .addComponent(btnDelete)
-                    .addComponent(btnDashboard))
-                .addContainerGap(58, Short.MAX_VALUE))
+                    .addComponent(btnExit))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
 
         pack();
@@ -140,14 +125,14 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
 
     private void loadTableData() {
         javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
-        model.setRowCount(0); // Clear table first
-
+        model.setRowCount(0);
+        
         ArrayList<Service> services = manager.getAllServices();
         for (Service s : services) {
             model.addRow(new Object[]{s.getId(), s.getName(), s.getPriority(), s.getAvgServiceTime()});
         }
     }
-
+    
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         // TODO add your handling code here:
         JTextField nameField = new JTextField();
@@ -180,18 +165,12 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
             try {
                 int avgTime = Integer.parseInt(avgTimeText);
 
-//                // Generate next ID (naive but works)
-//                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
-//                int nextId = model.getRowCount() + 1;
-//
-//                // Add to table
-//                model.addRow(new Object[]{nextId, name, priority, avgTime});
+                // Generate next ID (naive but works)
+                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
+                int nextId = model.getRowCount() + 1;
 
-                Service s = new Service(0, name);
-                s.setPriority(priority);
-                s.setAvgServiceTime(avgTime);
-                manager.addService(s);
-
+                // Add to table
+                model.addRow(new Object[]{nextId, name, priority, avgTime});
 
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "Average Service Time must be numbers.");
@@ -244,16 +223,9 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
             try {
                 int avgTime = Integer.parseInt(avgTimeText);
                 
-//                model.setValueAt(name, selectedRow, 1);
-//                model.setValueAt(priority, selectedRow, 2);
-//                model.setValueAt(avgTime, selectedRow, 3);
-
-                int id = (int) model.getValueAt(selectedRow, 0);
-                Service updated = new Service(id, name);
-                updated.setPriority(priority);
-                updated.setAvgServiceTime(avgTime);
-                manager.updateService(updated);
-
+                model.setValueAt(name, selectedRow, 1);
+                model.setValueAt(priority, selectedRow, 2);
+                model.setValueAt(avgTime, selectedRow, 3);
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "Average Service Time must be numbers.");
             }
@@ -273,22 +245,19 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this service?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
-//            model.removeRow(selectedRow);
-            int id = (int) tblServices.getValueAt(selectedRow, 0);
-            manager.removeService(id);
-
+            model.removeRow(selectedRow);
         }
         loadTableData();
     }//GEN-LAST:event_btnDeleteActionPerformed
 
-    private void btnDashboardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDashboardActionPerformed
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         // TODO add your handling code here:
         setVisible(false);
         dispose();
         
         AdminDashboard adminDashboard = new AdminDashboard();
         adminDashboard.setVisible(true);
-    }//GEN-LAST:event_btnDashboardActionPerformed
+    }//GEN-LAST:event_btnExitActionPerformed
 
     /**
      * @param args the command line arguments
@@ -327,9 +296,9 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
-    private javax.swing.JButton btnDashboard;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnExit;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblTitle;
     private javax.swing.JTable tblServices;

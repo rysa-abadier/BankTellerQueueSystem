@@ -1,16 +1,22 @@
-package com.bankteller.admin.teller;
-import com.bankteller.admin.queue.DBConnection;
-
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package com.example.tellermanagement;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
-import java.sql.*;
-
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+/**
+ *
+ * @author Mariah
+ */
 public class TellerManagementUI extends javax.swing.JFrame {
     private final TellerManager manager = new TellerManager();
-    public DBConnection db = new DBConnection();
 
     /**
      * Creates new form TellerManagementUI
@@ -25,7 +31,7 @@ public class TellerManagementUI extends javax.swing.JFrame {
     });
     }
     private void loadTellersToTable() {
-    try (Connection conn = db.connect();
+    try (Connection conn = DBConnection.getConnection();
          Statement stmt = conn.createStatement();
          ResultSet rs = stmt.executeQuery("SELECT * FROM tellers")) {
 
