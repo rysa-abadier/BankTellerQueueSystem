@@ -6,10 +6,7 @@ package com.bankteller.admin.teller;
 import com.bankteller.admin.queue.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
-/**
- *
- * @author Mariah
- */
+
 public class TellerManager {
     private DBConnection db = new DBConnection();
     
