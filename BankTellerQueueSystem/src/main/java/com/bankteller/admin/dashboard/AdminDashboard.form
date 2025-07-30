@@ -54,7 +54,11 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="titleActiveTellers" max="32767" attributes="0"/>
-                      <Component id="lblActiveTellers" pref="171" max="32767" attributes="0"/>
+                      <Component id="lblActiveTeller1" pref="171" max="32767" attributes="0"/>
+                      <Component id="lblActiveTeller2" alignment="0" pref="171" max="32767" attributes="0"/>
+                      <Component id="lblActiveTeller3" alignment="0" pref="171" max="32767" attributes="0"/>
+                      <Component id="lblActiveTeller4" alignment="0" pref="171" max="32767" attributes="0"/>
+                      <Component id="lblActiveTeller5" alignment="0" pref="171" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -77,11 +81,26 @@
                               <Component id="titleActiveTellers" alignment="3" min="-2" pref="41" max="-2" attributes="0"/>
                               <Component id="titleLongestWait" alignment="3" min="-2" pref="41" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="lblPeopleInQueue" alignment="3" min="-2" pref="59" max="-2" attributes="0"/>
-                              <Component id="lblActiveTellers" alignment="3" min="-2" pref="71" max="-2" attributes="0"/>
-                              <Component id="lblLongestWait" alignment="3" min="-2" pref="71" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" attributes="0">
+                                  <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="lblPeopleInQueue" alignment="3" min="-2" pref="59" max="-2" attributes="0"/>
+                                      <Component id="lblLongestWait" alignment="3" min="-2" pref="71" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Component id="lblActiveTeller1" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="lblActiveTeller2" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="lblActiveTeller3" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="lblActiveTeller4" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="lblActiveTeller5" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
@@ -299,7 +318,7 @@
             <Property name="text" type="java.lang.String" value="loading.."/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="lblActiveTellers">
+        <Component class="javax.swing.JLabel" name="lblActiveTeller1">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Rockwell" size="36" style="0"/>
@@ -309,6 +328,42 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lblLongestWait">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Rockwell" size="36" style="0"/>
+            </Property>
+            <Property name="horizontalAlignment" type="int" value="0"/>
+            <Property name="text" type="java.lang.String" value="loading.."/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblActiveTeller2">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Rockwell" size="36" style="0"/>
+            </Property>
+            <Property name="horizontalAlignment" type="int" value="0"/>
+            <Property name="text" type="java.lang.String" value="loading.."/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblActiveTeller3">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Rockwell" size="36" style="0"/>
+            </Property>
+            <Property name="horizontalAlignment" type="int" value="0"/>
+            <Property name="text" type="java.lang.String" value="loading.."/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblActiveTeller4">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Rockwell" size="36" style="0"/>
+            </Property>
+            <Property name="horizontalAlignment" type="int" value="0"/>
+            <Property name="text" type="java.lang.String" value="loading.."/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblActiveTeller5">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Rockwell" size="36" style="0"/>

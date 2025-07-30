@@ -5,8 +5,13 @@ import com.bankteller.admin.queue.*;
 import com.bankteller.admin.teller.*;
 import com.bankteller.admin.service.*;
 import java.awt.Color;
+import java.sql.*;
+import javax.swing.*;
+import javax.swing.table.*;
 
 public class AdminDashboard extends javax.swing.JFrame {
+    private DBConnection db = new DBConnection();
+    private Connection conn;
 
     /**
      * Creates new form dashboard
@@ -17,20 +22,81 @@ public class AdminDashboard extends javax.swing.JFrame {
     }
     
     private void simulateDashboardStats() {
-        new javax.swing.Timer(5000, evt -> {
-            int peopleInQueue = (int) (Math.random() * 10); // 0–9
-            int activeTellers = (int) (Math.random() * 4);   // 0–3
-            int waitMinutes = (int) (Math.random() * 10);    // 0–9 min
-            int waitSeconds = (int) (Math.random() * 60);
-
-            String formattedWait = String.format("%02d:%02d", waitMinutes, waitSeconds);
-
-            // Update UI components
-            lblPeopleInQueue.setText(String.valueOf(peopleInQueue));
-            lblActiveTellers.setText(String.valueOf(activeTellers));
-            lblLongestWait.setText(formattedWait);
-        }).start();
+        setLocationRelativeTo(null);
+        setSize(925, 500);
+        
+        peopleInQueue();
+        activeTellers();
+        longestWaitTime();
     }
+    
+    private void peopleInQueue() {
+        try {
+            conn = db.connect();
+            
+            Statement stmt = conn.createStatement();
+            ResultSet rs;
+            
+            rs = stmt.executeQuery("SELECT COUNT(*) AS No_Of_Queued FROM Customers WHERE Status != 'Active' AND DATE(Transaction_Date) = '2025-07-31';");
+
+            while (rs.next()) {
+                lblPeopleInQueue.setText(Integer.toString(rs.getInt("No_Of_Queued")));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void activeTellers() {
+        try {
+            conn = db.connect();
+            
+            Statement stmt = conn.createStatement();
+            ResultSet rs;
+            
+            boolean[] show = {false, false, false, false, false};
+            JLabel[] lbls = {lblActiveTeller1, lblActiveTeller2, lblActiveTeller3, lblActiveTeller4, lblActiveTeller5};
+            
+            rs = stmt.executeQuery("SELECT Teller_ID FROM customers WHERE status = 'Active' AND DATE(Transaction_Date) = '2025-07-31' ORDER BY Teller_ID ASC");
+
+            while (rs.next()) {
+                show[rs.getInt("Teller_ID")-1] = true;
+            }
+            
+            for (int i = 0; i < lbls.length; i++) {
+                lbls[i].setText("Teller " + (i+1));
+                lbls[i].setVisible(show[i]);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void longestWaitTime() {
+        try {
+            conn = db.connect();
+            
+            Statement stmt = conn.createStatement();
+            ResultSet rs;
+            
+            int waitTime = 0;
+            
+            rs = stmt.executeQuery("SELECT MAX(TIMESTAMPDIFF(SECOND, TIME(Transaction_Date), start_time)) AS LongestWaitTime FROM Customers WHERE Start_Time IS NOT NULL;");
+            
+            while (rs.next()) {
+                waitTime = rs.getInt("LongestWaitTime");
+            }
+            
+            int hours = waitTime / 3600;
+            int minutes = (waitTime % 3600) / 60;
+            int seconds = waitTime % 60;
+            
+            lblLongestWait.setText(String.format("%02dh %02dm %02ds", hours, minutes, seconds));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -54,8 +120,12 @@ public class AdminDashboard extends javax.swing.JFrame {
         titleActiveTellers = new javax.swing.JLabel();
         titleLongestWait = new javax.swing.JLabel();
         lblPeopleInQueue = new javax.swing.JLabel();
-        lblActiveTellers = new javax.swing.JLabel();
+        lblActiveTeller1 = new javax.swing.JLabel();
         lblLongestWait = new javax.swing.JLabel();
+        lblActiveTeller2 = new javax.swing.JLabel();
+        lblActiveTeller3 = new javax.swing.JLabel();
+        lblActiveTeller4 = new javax.swing.JLabel();
+        lblActiveTeller5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -185,13 +255,29 @@ public class AdminDashboard extends javax.swing.JFrame {
         lblPeopleInQueue.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblPeopleInQueue.setText("loading..");
 
-        lblActiveTellers.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
-        lblActiveTellers.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblActiveTellers.setText("loading..");
+        lblActiveTeller1.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
+        lblActiveTeller1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblActiveTeller1.setText("loading..");
 
         lblLongestWait.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
         lblLongestWait.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblLongestWait.setText("loading..");
+
+        lblActiveTeller2.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
+        lblActiveTeller2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblActiveTeller2.setText("loading..");
+
+        lblActiveTeller3.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
+        lblActiveTeller3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblActiveTeller3.setText("loading..");
+
+        lblActiveTeller4.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
+        lblActiveTeller4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblActiveTeller4.setText("loading..");
+
+        lblActiveTeller5.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
+        lblActiveTeller5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblActiveTeller5.setText("loading..");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -207,7 +293,11 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(titleActiveTellers, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblActiveTellers, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE))
+                    .addComponent(lblActiveTeller1, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE)
+                    .addComponent(lblActiveTeller2, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE)
+                    .addComponent(lblActiveTeller3, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE)
+                    .addComponent(lblActiveTeller4, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE)
+                    .addComponent(lblActiveTeller5, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(titleLongestWait, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -225,11 +315,23 @@ public class AdminDashboard extends javax.swing.JFrame {
                             .addComponent(titlePeopleInQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(titleActiveTellers, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(titleLongestWait, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(50, 50, 50)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(lblPeopleInQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblActiveTellers, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblLongestWait, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(lblPeopleInQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(lblLongestWait, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(lblActiveTeller1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblActiveTeller2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblActiveTeller3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblActiveTeller4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblActiveTeller5)))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -318,7 +420,11 @@ public class AdminDashboard extends javax.swing.JFrame {
     private javax.swing.JButton btnTellerManagement;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JLabel lblActiveTellers;
+    private javax.swing.JLabel lblActiveTeller1;
+    private javax.swing.JLabel lblActiveTeller2;
+    private javax.swing.JLabel lblActiveTeller3;
+    private javax.swing.JLabel lblActiveTeller4;
+    private javax.swing.JLabel lblActiveTeller5;
     private javax.swing.JLabel lblLongestWait;
     private javax.swing.JLabel lblPeopleInQueue;
     private javax.swing.JPanel navPanel;

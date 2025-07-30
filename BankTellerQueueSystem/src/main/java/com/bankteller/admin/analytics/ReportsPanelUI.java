@@ -4,6 +4,7 @@ import com.bankteller.admin.queue.*;
 import java.awt.*;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
 import javax.swing.table.*;
 
@@ -16,6 +17,8 @@ public class ReportsPanelUI extends javax.swing.JPanel {
         
         summaryMetrics();
         tellerEfficiency();
+        customerVolume();
+        heatMap();
         
         for (int i = 0; i < tblHeatMap.getColumnCount(); i++) {
             tblHeatMap.getColumnModel().getColumn(i).setCellRenderer(new HeatmapCellRenderer());
@@ -23,37 +26,35 @@ public class ReportsPanelUI extends javax.swing.JPanel {
     }
     
     class HeatmapCellRenderer extends DefaultTableCellRenderer {
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-        boolean isSelected, boolean hasFocus, int row, int column) {
-        
-        Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        
-        try {
-            int traffic = Integer.parseInt(value.toString());
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-            if (traffic >= 15) {
-                c.setBackground(new Color(255, 102, 102)); // 🔴 Red
-            } else if (traffic >= 13) {
-                c.setBackground(new Color(255, 178, 102)); // 🟧 Orange
-            } else if (traffic >= 10) {
-                c.setBackground(new Color(255, 255, 153)); // 🟨 Yellow
-            } else if (traffic >= 7) {
-                c.setBackground(new Color(204, 255, 153)); // 🟩 Light Green
-            } else {
-                c.setBackground(new Color(192, 255, 232)); // 🟦 Mint Green
+            try {
+                int traffic = Integer.parseInt(value.toString());
+
+                if (traffic >= 15) {
+                    c.setBackground(new Color(255, 102, 102)); // 🔴 Red
+                } else if (traffic >= 13) {
+                    c.setBackground(new Color(255, 178, 102)); // 🟧 Orange
+                } else if (traffic >= 10) {
+                    c.setBackground(new Color(255, 255, 153)); // 🟨 Yellow
+                } else if (traffic >= 7) {
+                    c.setBackground(new Color(204, 255, 153)); // 🟩 Light Green
+                } else {
+                    c.setBackground(new Color(192, 255, 232)); // 🟦 Mint Green
+                }
+
+                c.setForeground(Color.BLACK);
+            } catch (NumberFormatException e) {
+                // fallback for non-integer cells (e.g., header or null)
+                c.setBackground(Color.WHITE);
+                c.setForeground(Color.BLACK);
             }
 
-            c.setForeground(Color.BLACK);
-        } catch (NumberFormatException e) {
-            // fallback for non-integer cells (e.g., header or null)
-            c.setBackground(Color.WHITE);
-            c.setForeground(Color.BLACK);
+            return c;
         }
-
-        return c;
     }
-}
     
     private void summaryMetrics() {
         try {
@@ -80,7 +81,7 @@ public class ReportsPanelUI extends javax.swing.JPanel {
             // Transactions Today
             String num = "";
             
-            rs = stmt.executeQuery("SELECT COUNT(*) AS No_Of_TransactionsToday FROM Customers WHERE DATE(Transaction_Date) = '2025-07-28'");
+            rs = stmt.executeQuery("SELECT COUNT(*) AS No_Of_TransactionsToday FROM Customers WHERE DATE(Transaction_Date) = '2025-07-31'");
             
             while (rs.next()) {
                 num = rs.getString("No_Of_TransactionsToday");
@@ -92,11 +93,13 @@ public class ReportsPanelUI extends javax.swing.JPanel {
             total = 0;
             ctr = 0;
             
-            rs = stmt.executeQuery("SELECT TIMESTAMPDIFF(SECOND, TIME(transaction_date), start_time) AS WaitingTime FROM Customers");
+            rs = stmt.executeQuery("SELECT Start_Time, TIMESTAMPDIFF(SECOND, TIME(transaction_date), start_time) AS WaitingTime FROM Customers");
             
             while (rs.next()) {
-                ctr++;
-                total += rs.getInt("WaitingTime");
+                if (!rs.getTime("Start_Time").toString().equals("00:00:00")) {
+                    ctr++;
+                    total += rs.getInt("WaitingTime");
+                }
             }
             
             int avgSeconds  = total/ctr;
@@ -130,21 +133,218 @@ public class ReportsPanelUI extends javax.swing.JPanel {
             
             Statement stmt = conn.createStatement();
             ResultSet rs;
+            DefaultTableModel model = (DefaultTableModel) tblTellerEfficiency.getModel();
+            model.setRowCount(0);
             
-            rs = stmt.executeQuery("SELECT CONCAT(t.First_Name, ' ', t.Last_Name) AS Name, sub.Transactions_Count, (sub.Waiting_Time_Sum/sub.Transactions_Count) AS AvgWaitingTime FROM (\n" +
-"                SELECT Teller_ID, COUNT(*) AS Transactions_Count, SUM(TIMESTAMPDIFF(SECOND, TIME(Transaction_Date), start_time)) AS Waiting_Time_Sum\n" +
-"                FROM Customers\n" +
-"                GROUP BY Teller_ID\n" +
-"            ) AS sub\n" +
-"            JOIN Tellers t ON t.id = sub.Teller_ID;");
-            
+            rs = stmt.executeQuery("SELECT t.Service_ID, CONCAT(t.First_Name, ' ', t.Last_Name) AS Name, sub.Transactions_Count, (sub.Handling_Time_Sum/sub.Transactions_Count) AS AvgHandlingTime FROM (\n" +
+                "   SELECT Teller_ID, COUNT(*) AS Transactions_Count, SUM(TIMESTAMPDIFF(SECOND, Start_Time, End_Time)) AS Handling_Time_Sum\n" +
+                "   FROM Customers\n" +
+                "   WHERE Status = 'Completed'\n" +
+                "   GROUP BY Teller_ID\n" +
+            ") AS sub\n" +
+            "JOIN Tellers t ON t.id = sub.Teller_ID;");
+
             while (rs.next()) {
+                int totalTransactions = rs.getInt("Transactions_Count");
                 
+                int avgSeconds = rs.getInt("AvgHandlingTime");
+                int hours = avgSeconds / 3600;
+                int minutes = (avgSeconds % 3600) / 60;
+                int seconds = avgSeconds % 60;
+
+                model.addRow(new Object[]{
+                    rs.getString("Name"),
+                    totalTransactions,
+                    String.format("%02dh %02dm %02ds", hours, minutes, seconds),
+                    getEfficiencyStatus(rs.getInt("Service_ID"), avgSeconds)
+                });
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    
+    private String getEfficiencyStatus(int id, int seconds) {
+        double reference = getReferenceHandlingTime(id);
+        double status = 0;
+        
+        status = seconds/reference;
+        
+        if (status < 1) {
+            return "Excellent";
+        } else if (status == 1) {
+            return "Good";
+        } else if (status < 1.5) {
+            return "Fair";
+        } else
+        
+        return "Needs Improvement";
+    }
+    
+    private double getReferenceHandlingTime(int id) {
+        double avgReference = 0;
+        
+        try {
+            conn = db.connect();
+            
+            Statement stmt = conn.createStatement();
+            ResultSet rs;
+            
+            rs = stmt.executeQuery("SELECT TIME_TO_SEC(Average_Time) AS AvgHandlingTime FROM Services WHERE ID = " + id + ";");
+
+            while (rs.next()) {
+                avgReference = rs.getInt("AvgHandlingTime");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return avgReference;
+    }
+    
+    private void customerVolume() {
+        try {
+            conn = db.connect();
+            
+            Statement stmt = conn.createStatement();
+            ResultSet rs;
+            DefaultTableModel model = (DefaultTableModel) tblCustomerVolume.getModel();
+            model.setRowCount(0);
+            
+            String[] periods = {"Today", "Yesterday", "Last Week"};
+            int[] volumes = new int[periods.length];
+            
+            // Today
+            rs = stmt.executeQuery("SELECT COUNT(*) AS CustomerValue FROM Customers WHERE DATE(Transaction_Date) = '2025-07-31'");
+
+            while (rs.next()) {
+                volumes[0] = rs.getInt("CustomerValue");
+            }
+            
+            // Yesterday
+            rs = stmt.executeQuery("SELECT COUNT(*) AS CustomerValue FROM Customers WHERE DATE(Transaction_Date) = '2025-07-30'");
+
+            while (rs.next()) {
+                volumes[1] = rs.getInt("CustomerValue");
+            }
+            
+            // Last Week
+            rs = stmt.executeQuery("SELECT COUNT(*) AS CustomerValue FROM Customers WHERE DATE(Transaction_Date) BETWEEN '2025-07-20' AND '2025-07-26'");
+
+            while (rs.next()) {
+                volumes[2] = rs.getInt("CustomerValue");
+            }
+            
+            for (int i = 0; i < periods.length; i++) {
+                model.addRow(new Object[]{
+                    periods[i],
+                    volumes[i]
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void heatMap() {
+        try {
+            conn = db.connect();
+            
+            Statement stmt = conn.createStatement();
+            ResultSet rs;
+            DefaultTableModel model = (DefaultTableModel) tblHeatMap.getModel();
+            model.setRowCount(0);
+            
+            int[] hours = {8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+            String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+            int[][] avg = new int[days.length][hours.length];
+            
+            rs = stmt.executeQuery("SELECT DAYNAME(Transaction_Date) AS DayOfWeek, HOUR(Transaction_Date) AS HourOfDay, COUNT(*) AS TotalTransactions, ROUND(COUNT(*) / COUNT(DISTINCT DATE(Transaction_Date))) AS AvgTransactions FROM Customers WHERE Status = 'Completed' GROUP BY HOUR(Transaction_Date), DAYNAME(Transaction_Date);");
+
+            while (rs.next()) {
+                int dayIdx = dayOfWeek(rs.getString("DayOfWeek"));
+                int hourIdx = hourOfDay(rs.getInt("HourOfDay"));
+                
+                
+                if (hourIdx != -1 && dayIdx != -1) {
+                    avg[dayIdx][hourIdx] += rs.getInt("AvgTransactions");
+                }
+            }
+            
+            for (int i = 0; i < days.length; i++) {
+                Object[] row = new Object[hours.length];
+                row[0] = days[i];
+                for (int j = 0; j < hours.length; j++) {
+                    row[j] = avg[i][j];
+                }
+                model.addRow(row);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private int hourOfDay (int hour) {
+        switch (hour) {
+            case 8 -> {
+                return 0;
+            }
+            case 9 -> {
+                return 1;
+            }
+            case 10 -> {
+                return 2;
+            }
+            case 11 -> {
+                return 3;
+            }
+            case 12 -> {
+                return 4;
+            }
+            case 13 -> {
+                return 5;
+            }
+            case 14 -> {
+                return 6;
+            }
+            case 15 -> {
+                return 7;
+            }
+            case 16 -> {
+                return 8;
+            }
+            case 17 -> {
+                return 9;
+            }
+            default -> {
+                return -1;
+            }
+        }
+    }
+    
+    private int dayOfWeek(String day) {
+        switch (day) {
+            case "Monday" -> {
+                return 0;
+            }
+            case "Tuesday" -> {
+                return 1;
+            }
+            case "Wednesday" -> {
+                return 2;
+            }
+            case "Thursday" -> {
+                return 3;
+            }
+            case "Friday" -> {
+                return 4;
+            }
+            default -> {
+                return -1;
+            }
+        }
+    }
+        
     
     /**
      * This method is called from within the constructor to initialize the form.

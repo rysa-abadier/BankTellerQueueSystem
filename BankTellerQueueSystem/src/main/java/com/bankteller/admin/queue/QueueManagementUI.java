@@ -50,7 +50,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
                 model = activeTellerTable(i);
                 model.setRowCount(0);
                 
-                rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Active' AND teller_id = " + (i+1));
+                rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Active' AND DATE(Transaction_Date) = '2025-07-31' AND teller_id = " + (i+1));
                 
                 while (rs.next()) {
                     model.addRow(new Object[]{
@@ -64,7 +64,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
                 model = completedTellerTable(i);
                 model.setRowCount(0);
                 
-                rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Completed' AND teller_id = " + (i+1));
+                rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Completed' AND DATE(Transaction_Date) = '2025-07-31' AND teller_id = " + (i+1));
                 
                 while (rs.next()) {
                     model.addRow(new Object[]{
@@ -83,7 +83,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
             
             for (String emergency: emergencies) {
                 for (String status: statuses) {
-                    rs = stmt.executeQuery("SELECT * FROM customers WHERE emergency = '" + emergency + "' AND status = '" + status + "'");
+                    rs = stmt.executeQuery("SELECT * FROM customers WHERE emergency = '" + emergency + "' AND DATE(Transaction_Date) = '2025-07-31' AND status = '" + status + "'");
 
                     while (rs.next()) {
                         model.addRow(new Object[]{
@@ -154,7 +154,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
                     conn = db.connect();
 
                     Statement stmt = conn.createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE transaction_date = '2025-07-22' AND queue_no = " + selectedQueueNum);
+                    ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
                     
                     if (rs.next()) {
                         int tellerId = rs.getInt("teller_id");
@@ -857,7 +857,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
             int confirm = JOptionPane.showConfirmDialog(this, "Change customer emergency status?", "Emergency Customer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null);
             
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE transaction_date = '2025-07-22' AND queue_no = " + selectedQueueNum);
+            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
             
             int id = 0;
             String emergency = "";
@@ -905,7 +905,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
             conn = db.connect();
 
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE transaction_date = '2025-07-22' AND queue_no = " + selectedQueueNum);
+            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
             
             int id = 0;
             int teller = -1;
@@ -999,7 +999,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
             int confirm = JOptionPane.showConfirmDialog(this, "Confirm to skip customer?", "Skip Customer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null);
             
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE transaction_date = '2025-07-22' AND queue_no = " + selectedQueueNum);
+            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
             
             int id = 0;
             String emergency = "";
