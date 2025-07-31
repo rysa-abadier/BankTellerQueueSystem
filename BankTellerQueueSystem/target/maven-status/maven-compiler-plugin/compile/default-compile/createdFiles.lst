@@ -1,9 +1,13 @@
+com\bankteller\admin\analytics\ReportsPanelUIDraft$1.class
 com\bankteller\admin\analytics\ReportsPanel.class
 com\bankteller\admin\service\ServiceManager.class
 com\bankteller\admin\service\ServiceConfigurationUI$1.class
 com\bankteller\admin\queue\DBConnection.class
 com\bankteller\admin\teller\TellerManagementUI$3.class
+com\bankteller\admin\analytics\ReportsPanelUI$2.class
+com\bankteller\admin\analytics\ReportsPanelUIDraft$2.class
 com\bankteller\admin\teller\TellerManagementUI$6.class
+com\bankteller\admin\analytics\ReportsPanelUIDraft.class
 com\bankteller\admin\service\ServiceConfigurationUI$4.class
 com\bankteller\admin\service\ServiceConfigurationUI.class
 com\bankteller\admin\analytics\ReportsPanelUI$1.class
@@ -20,3 +24,4 @@ com\bankteller\admin\service\ServiceConfigurationUI$2.class
 com\bankteller\admin\service\ServiceConfigurationUI$5.class
 com\bankteller\admin\teller\TellerManagementUI$4.class
 com\bankteller\admin\analytics\ReportsPanelUI.class
+com\bankteller\admin\analytics\ReportsPanelUIDraft$HeatmapCellRenderer.class

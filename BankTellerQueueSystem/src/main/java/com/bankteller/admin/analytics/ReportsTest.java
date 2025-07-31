@@ -9,7 +9,7 @@ public class ReportsTest {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(1220, 920);
             frame.setLocationRelativeTo(null);
-            frame.setContentPane(new ReportsPanelUI());
+            frame.setContentPane(new ReportsPanelUIDraft());
             frame.setVisible(true);
         });
     }
