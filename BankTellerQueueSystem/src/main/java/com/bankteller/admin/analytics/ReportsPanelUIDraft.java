@@ -1,5 +1,6 @@
 package com.bankteller.admin.analytics;
 
+import com.bankteller.index.DBConnection;
 import com.bankteller.admin.queue.*;
 import java.awt.*;
 import java.sql.*;

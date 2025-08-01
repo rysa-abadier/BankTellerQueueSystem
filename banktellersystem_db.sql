@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 31, 2025 at 12:12 PM
+-- Generation Time: Aug 01, 2025 at 05:57 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -925,7 +925,7 @@ INSERT INTO `customers` (`id`, `teller_id`, `service_id`, `queue_no`, `name`, `s
 (877, 4, 3, 40, 'Matthew Herman', 'Completed', 'No', '2025-07-30 13:55:00', '13:56:00', '14:10:00'),
 (878, 4, 3, 1, 'Robert Fischer', 'Completed', 'Yes', '2025-07-31 15:50:00', '15:53:00', '16:10:00'),
 (879, 5, 4, 2, 'Carolyn Gonzales', 'Queued', 'Yes', '2025-07-31 14:08:00', '00:00:00', '00:00:00'),
-(880, 2, 5, 3, 'Ashley Baker', 'Active', 'Yes', '2025-07-31 12:38:00', '12:42:00', '12:47:00'),
+(880, 2, 5, 3, 'Ashley Baker', 'Queued', 'Yes', '2025-07-31 12:38:00', '00:00:00', '00:00:00'),
 (881, 2, 5, 4, 'Juan Valdez', 'Completed', 'Yes', '2025-07-31 08:36:00', '08:41:00', '08:47:00'),
 (882, 5, 4, 5, 'Amber Collins', 'Queued', 'Yes', '2025-07-31 14:41:00', '00:00:00', '00:00:00'),
 (883, 3, 2, 6, 'Francisco Ferguson', 'Queued', 'No', '2025-07-31 13:06:00', '00:00:00', '00:00:00'),
@@ -940,7 +940,7 @@ INSERT INTO `customers` (`id`, `teller_id`, `service_id`, `queue_no`, `name`, `s
 (892, 1, 1, 15, 'Michael Mendoza', 'Skipped', 'Yes', '2025-07-31 15:59:00', '00:00:00', '00:00:00'),
 (893, 1, 1, 16, 'Angela Lindsey', 'Reassigned', 'Yes', '2025-07-31 12:14:00', '00:00:00', '00:00:00'),
 (894, 5, 4, 17, 'Patty Gordon', 'Completed', 'Yes', '2025-07-31 14:59:00', '15:04:00', '15:30:00'),
-(895, 5, 4, 18, 'Suzanne Jones', 'Active', 'No', '2025-07-31 17:03:00', '17:05:00', '17:28:00'),
+(895, 5, 4, 18, 'Suzanne Jones', 'Queued', 'No', '2025-07-31 17:03:00', '00:00:00', '00:00:00'),
 (896, 4, 3, 19, 'Barbara Parker', 'Completed', 'No', '2025-07-31 08:12:00', '08:17:00', '08:31:00'),
 (897, 2, 5, 20, 'Dana Richardson', 'Reassigned', 'Yes', '2025-07-31 17:32:00', '00:00:00', '00:00:00'),
 (898, 2, 5, 21, 'John Walters', 'Completed', 'Yes', '2025-07-31 08:23:00', '08:25:00', '08:29:00'),
@@ -952,7 +952,7 @@ INSERT INTO `customers` (`id`, `teller_id`, `service_id`, `queue_no`, `name`, `s
 (904, 1, 1, 27, 'Mr. Christopher Everett MD', 'Reassigned', 'No', '2025-07-31 10:26:00', '00:00:00', '00:00:00'),
 (905, 5, 4, 28, 'Paul Jones', 'Reassigned', 'Yes', '2025-07-31 16:18:00', '00:00:00', '00:00:00'),
 (906, 1, 1, 29, 'Timothy Ingram', 'Completed', 'No', '2025-07-31 16:52:00', '16:55:00', '17:02:00'),
-(907, 4, 3, 30, 'Jordan Mccarthy', 'Active', 'No', '2025-07-31 17:30:00', '17:33:00', '17:50:00'),
+(907, 4, 3, 30, 'Jordan Mccarthy', 'Queued', 'No', '2025-07-31 17:30:00', '00:00:00', '00:00:00'),
 (908, 4, 3, 31, 'Allen Page', 'Queued', 'No', '2025-07-31 17:55:00', '00:00:00', '00:00:00'),
 (909, 1, 1, 32, 'Sheena Brewer', 'Completed', 'No', '2025-07-31 09:24:00', '09:26:00', '09:33:00'),
 (910, 2, 5, 33, 'Aaron Stanley', 'Reassigned', 'No', '2025-07-31 14:22:00', '00:00:00', '00:00:00'),
@@ -962,7 +962,7 @@ INSERT INTO `customers` (`id`, `teller_id`, `service_id`, `queue_no`, `name`, `s
 (914, 2, 5, 37, 'Daniel Snyder', 'Queued', 'Yes', '2025-07-31 15:47:00', '00:00:00', '00:00:00'),
 (915, 2, 5, 38, 'Scott Hamilton', 'Queued', 'No', '2025-07-31 11:14:00', '00:00:00', '00:00:00'),
 (916, 2, 5, 39, 'Christopher Garrison', 'Queued', 'No', '2025-07-31 10:49:00', '00:00:00', '00:00:00'),
-(917, 1, 1, 40, 'Bobby Gardner', 'Active', 'No', '2025-07-31 17:00:00', '17:05:00', '17:10:00'),
+(917, 1, 1, 40, 'Bobby Gardner', 'Queued', 'No', '2025-07-31 17:00:00', '00:00:00', '00:00:00'),
 (918, 4, 3, 41, 'Michelle Bradley', 'Reassigned', 'No', '2025-07-31 17:20:00', '00:00:00', '00:00:00'),
 (919, 5, 4, 42, 'Vanessa Barnett', 'Completed', 'No', '2025-07-31 15:11:00', '15:16:00', '15:39:00'),
 (920, 4, 3, 43, 'Ashley Hart', 'Queued', 'Yes', '2025-07-31 17:08:00', '00:00:00', '00:00:00'),
@@ -1018,6 +1018,30 @@ INSERT INTO `tellers` (`id`, `service_id`, `first_name`, `last_name`) VALUES
 (4, 3, 'Isabella Mikaella', 'Llave'),
 (5, 4, 'Noah', 'Peñaranda');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `password`) VALUES
+(1, 'admin', 'admin123'),
+(2, 'teller1', 'teller123'),
+(3, 'teller2', 'teller123'),
+(4, 'teller3', 'teller123'),
+(5, 'teller4', 'teller123'),
+(6, 'teller5', 'teller123');
+
 --
 -- Indexes for dumped tables
 --
@@ -1041,6 +1065,12 @@ ALTER TABLE `tellers`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -1061,6 +1091,12 @@ ALTER TABLE `services`
 --
 ALTER TABLE `tellers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

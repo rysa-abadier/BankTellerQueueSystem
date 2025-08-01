@@ -1,5 +1,7 @@
 package com.bankteller.admin.queue;
 
+import com.bankteller.index.DBConnection;
+import com.bankteller.admin.dashboard.*;
 import java.awt.Font;
 import java.sql.*;
 import javax.swing.*;
@@ -264,6 +266,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
         lblEnd = new javax.swing.JLabel();
         viewStart = new javax.swing.JLabel();
         viewEnd = new javax.swing.JLabel();
+        btnExit = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -803,25 +806,36 @@ public class QueueManagementUI extends javax.swing.JFrame {
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblEnd)
                     .addComponent(viewEnd))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
                 .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnReassign)
                     .addComponent(btnSkip))
                 .addContainerGap())
         );
 
+        btnExit.setFont(new java.awt.Font("Yu Gothic", 0, 12)); // NOI18N
+        btnExit.setText("Back to Dashboard");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExitActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlQueueMgmtLayout = new javax.swing.GroupLayout(pnlQueueMgmt);
         pnlQueueMgmt.setLayout(pnlQueueMgmtLayout);
         pnlQueueMgmtLayout.setHorizontalGroup(
             pnlQueueMgmtLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlQueueMgmtLayout.createSequentialGroup()
+            .addGroup(pnlQueueMgmtLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlQueueMgmtLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tabCustomers)
                     .addGroup(pnlQueueMgmtLayout.createSequentialGroup()
                         .addComponent(pnlQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(pnlDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(pnlDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlQueueMgmtLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnExit)))
                 .addContainerGap())
         );
         pnlQueueMgmtLayout.setVerticalGroup(
@@ -833,6 +847,8 @@ public class QueueManagementUI extends javax.swing.JFrame {
                 .addGroup(pnlQueueMgmtLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnlQueue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(pnlDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnExit)
                 .addContainerGap())
         );
 
@@ -1035,6 +1051,15 @@ public class QueueManagementUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnSkipActionPerformed
 
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
+        // TODO add your handling code here:
+        setVisible(false);
+        dispose();
+
+        AdminDashboard adminDashboard = new AdminDashboard();
+        adminDashboard.setVisible(true);
+    }//GEN-LAST:event_btnExitActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1071,6 +1096,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExit;
     private javax.swing.JButton btnReassign;
     private javax.swing.JButton btnSkip;
     private javax.swing.JCheckBox chkEmergency;

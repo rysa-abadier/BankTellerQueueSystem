@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.bankteller.admin.teller;
-import com.bankteller.admin.queue.DBConnection;
+import com.bankteller.index.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 /**

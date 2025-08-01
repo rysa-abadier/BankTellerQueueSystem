@@ -1,5 +1,6 @@
 package com.bankteller.admin.service;
 
+import com.bankteller.index.DBConnection;
 import com.bankteller.admin.queue.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class ServiceManager {
                 );
                 
                 service.setPriority(rs.getString("priority"));
-                service.setAvgServiceTime(rs.getInt("averageTime"));
+                service.setAvgServiceTime(rs.getTime("average_time").toString());
                 
                 services.add(service);
             }
@@ -48,7 +49,7 @@ public class ServiceManager {
     }
 
     public void addService(Service s) {
-        String sql = "INSERT INTO services(name, priority, averageTime) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO services(name, priority, average_time) VALUES (?, ?, ?)";
         
         try {
             Connection conn = db.connect();
@@ -56,7 +57,7 @@ public class ServiceManager {
             
             stmt.setString(1, s.getName());
             stmt.setString(2, s.getPriority());
-            stmt.setInt(3, s.getAvgServiceTime());
+            stmt.setString(3, s.getAvgServiceTime());
             
             stmt.executeUpdate();
             ResultSet rs = stmt.getGeneratedKeys();
@@ -85,7 +86,7 @@ public class ServiceManager {
     }
     
     public void updateService(Service updated) {
-        String sql = "UPDATE services SET name = ?, priority = ?, averageTime = ? WHERE id = ?";
+        String sql = "UPDATE services SET name = ?, priority = ?, average_time = ? WHERE id = ?";
 
         try {
         Connection conn = db.connect();
@@ -93,7 +94,7 @@ public class ServiceManager {
 
         stmt.setString(1, updated.getName());
         stmt.setString(2, updated.getPriority());
-        stmt.setInt(3, updated.getAvgServiceTime());
+        stmt.setString(3, updated.getAvgServiceTime());
         stmt.setInt(4, updated.getId());
         stmt.executeUpdate();
 

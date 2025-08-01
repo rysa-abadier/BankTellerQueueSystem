@@ -1,4 +1,4 @@
-package com.bankteller.admin.queue;
+package com.bankteller.index;
 
 import java.sql.*;
 

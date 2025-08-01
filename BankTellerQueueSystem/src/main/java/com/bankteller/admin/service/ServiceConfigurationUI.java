@@ -1,6 +1,6 @@
 package com.bankteller.admin.service;
 
-import com.bankteller.admin.dashboard.*;
+import com.bankteller.admin.dashboard.AdminDashboard;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -37,13 +37,17 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         btnExit = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(600, 450));
 
         lblTitle.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
         lblTitle.setText("Service Configuration");
 
         tblServices.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
             },
             new String [] {
                 "ID", "Name", "Priority", "Average Service Time"
@@ -51,7 +55,9 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tblServices);
         if (tblServices.getColumnModel().getColumnCount() > 0) {
-            tblServices.getColumnModel().getColumn(3).setPreferredWidth(200);
+            tblServices.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tblServices.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tblServices.getColumnModel().getColumn(3).setPreferredWidth(150);
         }
 
         btnAdd.setText("Add");
@@ -86,12 +92,12 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(lblTitle)
-                .addGap(140, 140, 140))
             .addGroup(layout.createSequentialGroup()
-                .addGap(55, 55, 55)
+                .addGap(140, 140, 140)
+                .addComponent(lblTitle)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(78, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnAdd)
@@ -101,8 +107,8 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
                         .addComponent(btnDelete)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnExit))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 483, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(62, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(70, 70, 70))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -110,14 +116,14 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(lblTitle)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAdd)
                     .addComponent(btnEdit)
                     .addComponent(btnDelete)
                     .addComponent(btnExit))
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addContainerGap(54, Short.MAX_VALUE))
         );
 
         pack();

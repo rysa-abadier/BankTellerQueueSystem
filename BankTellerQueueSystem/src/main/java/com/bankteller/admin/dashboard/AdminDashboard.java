@@ -1,5 +1,6 @@
 package com.bankteller.admin.dashboard;
 
+import com.bankteller.index.*;
 import com.bankteller.admin.analytics.*;
 import com.bankteller.admin.queue.*;
 import com.bankteller.admin.teller.*;
@@ -211,12 +212,11 @@ public class AdminDashboard extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(navPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(navPanelLayout.createSequentialGroup()
-                        .addGroup(navPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnTellerManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnServiceConfiguration))
+                        .addComponent(btnTellerManagement, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(btnReportsAndAnalytics, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnQueueManagement, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnQueueManagement, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnServiceConfiguration, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addGroup(navPanelLayout.createSequentialGroup()
                 .addGap(102, 102, 102)
@@ -373,7 +373,11 @@ public class AdminDashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_btnQueueManagementActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
-        this.dispose(); // Close AdminDashboard
+        setVisible(false);
+        dispose();
+        
+        Login login = new Login();
+        login.setVisible(true); // Close AdminDashboard
     }//GEN-LAST:event_btnLogoutActionPerformed
 
     /**

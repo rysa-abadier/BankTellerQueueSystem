@@ -3,15 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.bankteller.admin.teller;
+import com.bankteller.index.DBConnection;
+import com.bankteller.admin.dashboard.*;
 import com.bankteller.admin.queue.*;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
+import javax.swing.table.*;
+import java.awt.event.*;
+import java.sql.*;
 /**
  *
  * @author Mariah
@@ -35,15 +33,15 @@ public class TellerManagementUI extends javax.swing.JFrame {
     }
     private void loadTellersToTable() {
     try (Connection conn = db.connect();
-         Statement stmt = conn.createStatement();
-         ResultSet rs = stmt.executeQuery("SELECT * FROM tellers")) {
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT t.id AS 'ID', s.name AS 'Service', t.first_name AS 'First Name', t.last_name As'Last Name' FROM Tellers t LEFT JOIN Services s ON s.id = t.service_id")) {
 
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
 
         String[] columnNames = new String[columnCount];
         for (int i = 0; i < columnCount; i++) {
-            columnNames[i] = metaData.getColumnName(i + 1);
+            columnNames[i] = metaData.getColumnLabel(i + 1);
         }
 
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
@@ -81,6 +79,7 @@ public class TellerManagementUI extends javax.swing.JFrame {
         btnEdit = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -108,7 +107,7 @@ public class TellerManagementUI extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "ID", "Service", "First Name", "Last Name"
             }
         ));
         jScrollPane2.setViewportView(tellerTable);
@@ -141,32 +140,42 @@ public class TellerManagementUI extends javax.swing.JFrame {
             }
         });
 
+        btnExit.setText("Back to Dashboard");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExitActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(14, 14, 14)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel1))
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnExit))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnDelete)
-                            .addComponent(btnRefresh)
-                            .addComponent(btnEdit)
-                            .addComponent(btnAdd))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnRefresh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnEdit, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnDelete, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(29, 29, 29)
+                .addGap(20, 20, 20)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnExit)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(23, 23, 23)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
@@ -178,7 +187,7 @@ public class TellerManagementUI extends javax.swing.JFrame {
                         .addComponent(btnDelete)
                         .addGap(18, 18, 18)
                         .addComponent(btnRefresh)))
-                .addContainerGap(243, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         pack();
@@ -229,6 +238,15 @@ public class TellerManagementUI extends javax.swing.JFrame {
         loadTellersToTable();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
+        // TODO add your handling code here:
+        setVisible(false);
+        dispose();
+
+        AdminDashboard adminDashboard = new AdminDashboard();
+        adminDashboard.setVisible(true);
+    }//GEN-LAST:event_btnExitActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -268,6 +286,7 @@ public class TellerManagementUI extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnExit;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
