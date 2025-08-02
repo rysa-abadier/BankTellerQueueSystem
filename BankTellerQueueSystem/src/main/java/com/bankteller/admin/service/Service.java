@@ -4,7 +4,7 @@ public class Service {
     private int id;
     private String name;
     private String priority;
-    private String avgServiceTime;
+    private int avgServiceTime;
 
     public Service(int id, String name) {
         this.id = id;
@@ -35,11 +35,11 @@ public class Service {
         this.priority = priority;
     }
 
-    public String getAvgServiceTime() {
+    public int getAvgServiceTime() {
         return avgServiceTime;
     }
 
-    public void setAvgServiceTime(String avgServiceTime) {
+    public void setAvgServiceTime(int avgServiceTime) {
         this.avgServiceTime = avgServiceTime;
     }
 }

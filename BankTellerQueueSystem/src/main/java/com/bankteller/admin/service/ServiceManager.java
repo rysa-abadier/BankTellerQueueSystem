@@ -1,14 +1,19 @@
 package com.bankteller.admin.service;
 
 import com.bankteller.index.DBConnection;
-import com.bankteller.admin.queue.*;
 import java.sql.*;
 import java.util.ArrayList;
 
 public class ServiceManager {
     public DBConnection db = new DBConnection();
     private ArrayList<Service> services;
-
+    
+    private String minutesToTimeString(int minutes) {
+        int mins = minutes % 60;
+        
+        return String.format("00:%02d:00", mins);
+    }
+    
     public ServiceManager() {
         services = new ArrayList<>();
     }
@@ -29,7 +34,10 @@ public class ServiceManager {
                 );
                 
                 service.setPriority(rs.getString("priority"));
-                service.setAvgServiceTime(rs.getTime("average_time").toString());
+                
+                Time time = rs.getTime("average_time");
+                int minutes = time.toLocalTime().getHour() * 60 + time.toLocalTime().getMinute();
+                service.setAvgServiceTime(minutes);
                 
                 services.add(service);
             }
@@ -57,7 +65,7 @@ public class ServiceManager {
             
             stmt.setString(1, s.getName());
             stmt.setString(2, s.getPriority());
-            stmt.setString(3, s.getAvgServiceTime());
+            stmt.setString(3, minutesToTimeString(s.getAvgServiceTime()));
             
             stmt.executeUpdate();
             ResultSet rs = stmt.getGeneratedKeys();
@@ -94,7 +102,7 @@ public class ServiceManager {
 
         stmt.setString(1, updated.getName());
         stmt.setString(2, updated.getPriority());
-        stmt.setString(3, updated.getAvgServiceTime());
+        stmt.setString(3, minutesToTimeString(updated.getAvgServiceTime()));
         stmt.setInt(4, updated.getId());
         stmt.executeUpdate();
 

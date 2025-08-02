@@ -4,6 +4,7 @@ import com.bankteller.admin.dashboard.AdminDashboard;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class ServiceConfigurationUI extends javax.swing.JFrame {
     private ServiceManager manager = new ServiceManager();
@@ -129,20 +130,37 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private String minutesToTimeString(int minutes) {
+        return String.format("00:%02d:00", minutes);
+    }
+    
     private void loadTableData() {
-        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
+        DefaultTableModel model = (DefaultTableModel) tblServices.getModel();
         model.setRowCount(0);
         
         ArrayList<Service> services = manager.getAllServices();
         for (Service s : services) {
-            model.addRow(new Object[]{s.getId(), s.getName(), s.getPriority(), s.getAvgServiceTime()});
+            model.addRow(new Object[] {
+                s.getId(), s.getName(), s.getPriority(), minutesToTimeString(s.getAvgServiceTime())
+            });
+        }
+    }
+    
+    private int timeStringToMinutes(String timeStr) {
+        try {
+            String[] parts = timeStr.split(":");
+            int hours = Integer.parseInt(parts[0]);
+            int minutes = Integer.parseInt(parts[1]);
+            return (hours * 60) + minutes;
+        } catch (Exception e) {
+            return 0; 
         }
     }
     
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         // TODO add your handling code here:
         JTextField nameField = new JTextField();
-        JComboBox<String> priorityComboBox = new JComboBox<>(new String[] {"Urgent", "High", "Medium", "Low"});
+        JComboBox<String> priorityComboBox = new JComboBox<>(new String[] {"Critical", "High", "Medium", "Low"});
         JTextField avgTimeField = new JTextField();
 
         JPanel panel = new JPanel(new GridLayout(0, 1));
@@ -170,19 +188,16 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
 
             try {
                 int avgTime = Integer.parseInt(avgTimeText);
-
-                // Generate next ID (naive but works)
-                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
-                int nextId = model.getRowCount() + 1;
-
-                // Add to table
-                model.addRow(new Object[]{nextId, name, priority, avgTime});
-
+                Service newService = new Service(0, name);
+                newService.setPriority(priority);
+                newService.setAvgServiceTime(avgTime);
+                
+                manager.addService(newService);
+                loadTableData();
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "Average Service Time must be numbers.");
             }
         }
-        loadTableData();
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
@@ -193,12 +208,16 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
             return;
         }
 
-        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
-
+        DefaultTableModel model = (DefaultTableModel) tblServices.getModel();
+        int id = (int) model.getValueAt(selectedRow, 0);
+        
         // Pre-fill the fields with existing values
         String currentName = model.getValueAt(selectedRow, 1).toString();
         String currentPriority = model.getValueAt(selectedRow, 2).toString();
-        String currentAvgTime = model.getValueAt(selectedRow, 3).toString();
+        
+        String timeStr = model.getValueAt(selectedRow, 3).toString();
+        int currentMinutes = timeStringToMinutes(timeStr);
+        String currentAvgTime = Integer.toString(currentMinutes);
 
         JTextField nameField = new JTextField(currentName);
         JComboBox<String> priorityComboBox = new JComboBox<>(new String[] {"Urgent", "High", "Medium", "Low"});
@@ -229,15 +248,17 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
             try {
                 int avgTime = Integer.parseInt(avgTimeText);
                 
-                model.setValueAt(name, selectedRow, 1);
-                model.setValueAt(priority, selectedRow, 2);
-                model.setValueAt(avgTime, selectedRow, 3);
+                Service updated = new Service(id, name);
+                updated.setPriority(priority);
+                updated.setAvgServiceTime(avgTime);
+                
+                manager.updateService(updated);
+                loadTableData();
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "Average Service Time must be numbers.");
             }
             
         }
-        loadTableData();
     }//GEN-LAST:event_btnEditActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
@@ -247,13 +268,15 @@ public class ServiceConfigurationUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Please select a row to delete.");
             return;
         }
+        
+        DefaultTableModel model = (DefaultTableModel) tblServices.getModel();
+        int id = (int) model.getValueAt(selectedRow, 0);
 
         int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this service?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
-            javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) tblServices.getModel();
-            model.removeRow(selectedRow);
+            manager.removeService(id);
+            loadTableData();
         }
-        loadTableData();
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
