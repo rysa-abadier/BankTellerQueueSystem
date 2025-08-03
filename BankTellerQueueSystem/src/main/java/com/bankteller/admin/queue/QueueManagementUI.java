@@ -4,17 +4,22 @@ import com.bankteller.index.DBConnection;
 import com.bankteller.admin.dashboard.*;
 import java.awt.Font;
 import java.sql.*;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.table.*;
 
 public class QueueManagementUI extends javax.swing.JFrame {
-    private DBConnection db = new DBConnection();
+    private final DBConnection db = new DBConnection();
     private Connection conn;
-    
+    private Statement stmt;
+    private ResultSet rs;
+    private DefaultTableModel model;
+                    
+    private QueueManager manager = new QueueManager();
     private int selectedQueueNum = -1;
     
-    private Font placeholder = new Font("Yu Gothic", Font.ITALIC, 14);
-    private Font data = new Font("Yu Gothic", Font.PLAIN, 14);
+    private final Font placeholder = new Font("Yu Gothic", Font.ITALIC, 14);
+    private final Font data = new Font("Yu Gothic", Font.PLAIN, 14);
     
     /**
      * Creates new form QueueManagementUI
@@ -39,85 +44,70 @@ public class QueueManagementUI extends javax.swing.JFrame {
         setUpSelectionListener(tblCompleted5);
     }
     
-    private void refreshData() {
-        try {
-            conn = db.connect();
-
-            Statement stmt = conn.createStatement();
-            ResultSet rs;
-            DefaultTableModel model;
-            
-            // Active Customers
-            for (int i = 0; i < 5; i++) {
-                model = activeTellerTable(i);
-                model.setRowCount(0);
-                
-                rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Active' AND DATE(Transaction_Date) = '2025-07-31' AND teller_id = " + (i+1));
-                
-                while (rs.next()) {
-                    model.addRow(new Object[]{
-                        rs.getInt("queue_no")
-                    });
-                }
-            }
-            
-            // Completed Customers
-            for (int i = 0; i < 5; i++) {
-                model = completedTellerTable(i);
-                model.setRowCount(0);
-                
-                rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Completed' AND DATE(Transaction_Date) = '2025-07-31' AND teller_id = " + (i+1));
-                
-                while (rs.next()) {
-                    model.addRow(new Object[]{
-                        rs.getInt("queue_no")
-                    });
-                }
-            }
-            
-            // Queued Customers
-            model = (DefaultTableModel) tblQueue.getModel();
+    private void getActive() {
+        for (int i = 0; i < 5; i++) {
+            model = activeTellerTable(i);
             model.setRowCount(0);
             
-            String[] statuses = {"Queued", "Reassigned", "Skipped"};
+            int active = manager.getActiveCustomers(i+1);
             
-            String[] emergencies = {"Yes", "NO"};
-            
-            for (String emergency: emergencies) {
-                for (String status: statuses) {
-                    rs = stmt.executeQuery("SELECT * FROM customers WHERE emergency = '" + emergency + "' AND DATE(Transaction_Date) = '2025-07-31' AND status = '" + status + "'");
-
-                    while (rs.next()) {
-                        model.addRow(new Object[]{
-                            rs.getInt("teller_id"),
-                            rs.getInt("queue_no"),
-                            rs.getString("status")
-                        });
-                    }
-                }
-            }
-            
-            viewQueue.setText("0");
-            viewName.setText("None Selected");
-            viewService.setText("None Selected");
-            viewStatus.setText("None Selected");
-            viewTeller.setText("None Selected");
-            chkEmergency.setSelected(false);
-            viewStart.setText("None Selected");
-            viewEnd.setText("None Selected");
-            
-            viewName.setFont(placeholder);
-            viewQueue.setFont(placeholder);
-            viewService.setFont(placeholder);
-            viewStatus.setFont(placeholder);
-            viewTeller.setFont(placeholder);
-            viewStart.setFont(placeholder);
-            viewEnd.setFont(placeholder);
-            
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            model.addRow(new Object[]{
+                active == 0 ? null : active
+            });
         }
+    }
+    
+    private void getCompleted() {
+        for (int i = 0; i < 5; i++) {
+            model = completedTellerTable(i);
+            model.setRowCount(0);
+            
+            List<Integer> complete = manager.getCompletedCustomers(i+1);
+            
+            for (int c : complete) {
+                model.addRow(new Object[]{
+                    c == 0 ? null : c
+                });
+            }
+        }
+    }
+    
+    private void getQueued() {
+        model = (DefaultTableModel) tblQueue.getModel();
+        model.setRowCount(0);
+
+        Queue<Transaction> queue = manager.getAllQueue();
+        
+        for (Transaction q : queue) {
+            model.addRow(new Object[]{
+                q.getTeller_id(),
+                q.getQueue_no(),
+                q.getStatus()
+            });
+        }
+    }
+    
+    private void refreshData() {
+        getActive();
+        getCompleted();
+        getQueued();
+
+        viewQueue.setText("0");
+        viewName.setText("None Selected");
+        viewService.setText("None Selected");
+        viewStatus.setText("None Selected");
+        viewTeller.setText("None Selected");
+        chkEmergency.setSelected(false);
+        viewStart.setText("None Selected");
+        viewEnd.setText("None Selected");
+
+        viewName.setFont(placeholder);
+        viewQueue.setFont(placeholder);
+        viewService.setFont(placeholder);
+        viewStatus.setFont(placeholder);
+        viewTeller.setFont(placeholder);
+        viewStart.setFont(placeholder);
+        viewEnd.setFont(placeholder);
     }
     
     private DefaultTableModel activeTellerTable(int num)  {
@@ -155,8 +145,8 @@ public class QueueManagementUI extends javax.swing.JFrame {
                     
                     conn = db.connect();
 
-                    Statement stmt = conn.createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
+                    stmt = conn.createStatement();
+                    rs = stmt.executeQuery(manager.selectByQueueNum(selectedQueueNum));
                     
                     if (rs.next()) {
                         int tellerId = rs.getInt("teller_id");
@@ -184,12 +174,12 @@ public class QueueManagementUI extends javax.swing.JFrame {
                         
                         ResultSet tellerSQL = stmt.executeQuery("SELECT * FROM tellers WHERE id = " + tellerId);
                         if (tellerSQL.next()) {
-                            viewTeller.setText(tellerSQL.getString("first_name") + " " + tellerSQL.getString("last_name"));
+                            viewTeller.setText(tellerSQL.getString("first_name") != null && tellerSQL.getString("last_name") != null ? tellerSQL.getString("first_name") + " " + tellerSQL.getString("last_name") : "REMOVED TELLER");
                         }
                         
                         ResultSet serviceSQL = stmt.executeQuery("SELECT * FROM services WHERE id = " + serviceId);
                         if (serviceSQL.next()) {
-                            viewService.setText(serviceSQL.getString("name"));
+                            viewService.setText(serviceSQL.getString("name") != null ? serviceSQL.getString("name") : "DELETED SERVICE");
                         }
                         
                         viewName.setFont(data);
@@ -872,8 +862,8 @@ public class QueueManagementUI extends javax.swing.JFrame {
             
             int confirm = JOptionPane.showConfirmDialog(this, "Change customer emergency status?", "Emergency Customer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null);
             
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(manager.selectByQueueNum(selectedQueueNum));
             
             int id = 0;
             String emergency = "";
@@ -890,8 +880,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
             }
             
             if (confirm == JOptionPane.YES_OPTION) {
-                String sql = "UPDATE customers SET emergency = ? WHERE id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
+                PreparedStatement pstmt = conn.prepareStatement(manager.updateQuery("`emergency` = ?"));
 
                 pstmt.setString(1, emergency);
                 pstmt.setInt(2, id);
@@ -920,8 +909,8 @@ public class QueueManagementUI extends javax.swing.JFrame {
         try {            
             conn = db.connect();
 
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(manager.selectByQueueNum(selectedQueueNum));
             
             int id = 0;
             int teller = -1;
@@ -943,12 +932,12 @@ public class QueueManagementUI extends javax.swing.JFrame {
 
                 rs = stmt.executeQuery("SELECT * FROM tellers WHERE id = " + tellerId);
                 if (rs.next()) {
-                    tellerName = rs.getString("first_name") + " " + rs.getString("last_name");
+                    tellerName = rs.getString("first_name") != null && rs.getString("last_name") != null ? rs.getString("first_name") + " " + rs.getString("last_name") : "REMOVED TELLER";
                 }
 
                 rs = stmt.executeQuery("SELECT * FROM services WHERE id = " + serviceId);
                 if (rs.next()) {
-                    serviceName = rs.getString("name");
+                    serviceName = rs.getString("name") != null ? rs.getString("name") : "DELETED SERVICE";
                 }
                 
                 if (status.equals("Completed")) {
@@ -968,7 +957,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
                 rs = stmt.executeQuery("SELECT * FROM services WHERE id = " + service);
                 
                 if (rs.next()) {
-                    sb.append(rs.getString("name"));
+                    sb.append(rs.getString("name") != null ? rs.getString("name") : "DELETED SERVICE");
                 }
                 
                 options[i] = sb.toString();
@@ -983,13 +972,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
                     }
                 }
 
-                String sql = "UPDATE customers SET teller_id = ?, status = 'Reassigned' WHERE id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-
-                pstmt.setInt(1, teller);
-                pstmt.setInt(2, id);
-
-                int rows = pstmt.executeUpdate();
+                int rows = manager.reassign(id, teller);
                 if (rows > 0) {
                     JOptionPane.showMessageDialog(this, "Customer reassigned successfully!");
                 }
@@ -1015,7 +998,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
             int confirm = JOptionPane.showConfirmDialog(this, "Confirm to skip customer?", "Skip Customer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null);
             
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
+            ResultSet rs = stmt.executeQuery(manager.selectByQueueNum(selectedQueueNum));
             
             int id = 0;
             String emergency = "";
@@ -1031,12 +1014,7 @@ public class QueueManagementUI extends javax.swing.JFrame {
             }
             
             if (confirm == JOptionPane.YES_OPTION) {
-                String sql = "UPDATE customers SET status = 'Skipped' WHERE id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-
-                pstmt.setInt(1, id);
-
-                int rows = pstmt.executeUpdate();
+                int rows = manager.skip(id);
                 if (rows > 0) {
                     JOptionPane.showMessageDialog(this, "Customer skipped successfully!");
                 }

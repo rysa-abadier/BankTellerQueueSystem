@@ -28,7 +28,7 @@ public class AdminDashboard extends javax.swing.JFrame {
         
         peopleInQueue();
         activeTellers();
-        longestWaitTime();
+        averageWaitTime();
     }
     
     private void peopleInQueue() {
@@ -38,7 +38,7 @@ public class AdminDashboard extends javax.swing.JFrame {
             Statement stmt = conn.createStatement();
             ResultSet rs;
             
-            rs = stmt.executeQuery("SELECT COUNT(*) AS No_Of_Queued FROM Customers WHERE Status != 'Active' AND DATE(Transaction_Date) = '2025-07-31';");
+            rs = stmt.executeQuery("SELECT COUNT(*) AS No_Of_Queued FROM transactions WHERE Status != 'Active' AND DATE(Transaction_Date) = '2025-07-31';");
 
             while (rs.next()) {
                 lblPeopleInQueue.setText(Integer.toString(rs.getInt("No_Of_Queued")));
@@ -58,7 +58,7 @@ public class AdminDashboard extends javax.swing.JFrame {
             boolean[] show = {false, false, false, false, false};
             JLabel[] lbls = {lblActiveTeller1, lblActiveTeller2, lblActiveTeller3, lblActiveTeller4, lblActiveTeller5};
             
-            rs = stmt.executeQuery("SELECT Teller_ID FROM customers WHERE status = 'Active' AND DATE(Transaction_Date) = '2025-07-31' ORDER BY Teller_ID ASC");
+            rs = stmt.executeQuery("SELECT Teller_ID FROM transactions WHERE status = 'Active' AND DATE(Transaction_Date) = '2025-07-31' ORDER BY Teller_ID ASC");
 
             while (rs.next()) {
                 show[rs.getInt("Teller_ID")-1] = true;
@@ -73,24 +73,29 @@ public class AdminDashboard extends javax.swing.JFrame {
         }
     }
     
-    private void longestWaitTime() {
+    private void averageWaitTime() {
         try {
             conn = db.connect();
             
             Statement stmt = conn.createStatement();
             ResultSet rs;
             
-            int waitTime = 0;
+            int total = 0;
+            int ctr = 0;
             
-            rs = stmt.executeQuery("SELECT MAX(TIMESTAMPDIFF(SECOND, TIME(Transaction_Date), start_time)) AS LongestWaitTime FROM Customers WHERE Start_Time IS NOT NULL;");
+            rs = stmt.executeQuery("SELECT Start_Time, TIMESTAMPDIFF(SECOND, TIME(transaction_date), start_time) AS WaitingTime FROM transactions");
             
             while (rs.next()) {
-                waitTime = rs.getInt("LongestWaitTime");
+                if (!rs.getTime("Start_Time").toString().equals("00:00:00")) {
+                    ctr++;
+                    total += rs.getInt("WaitingTime");
+                }
             }
             
-            int hours = waitTime / 3600;
-            int minutes = (waitTime % 3600) / 60;
-            int seconds = waitTime % 60;
+            int avgSeconds  = total/ctr;
+            int hours = avgSeconds / 3600;
+            int minutes = (avgSeconds % 3600) / 60;
+            int seconds = avgSeconds % 60;
             
             lblLongestWait.setText(String.format("%02dh %02dm %02ds", hours, minutes, seconds));
         } catch (Exception e) {
@@ -249,7 +254,7 @@ public class AdminDashboard extends javax.swing.JFrame {
 
         titleLongestWait.setFont(new java.awt.Font("Rockwell Condensed", 1, 18)); // NOI18N
         titleLongestWait.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        titleLongestWait.setText("Longest Wait Time");
+        titleLongestWait.setText("Average Wait Time");
 
         lblPeopleInQueue.setFont(new java.awt.Font("Rockwell", 0, 36)); // NOI18N
         lblPeopleInQueue.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);

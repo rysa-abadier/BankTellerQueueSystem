@@ -2,7 +2,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package com.example.tellermanagement;
+package com.bankteller.admin.teller;
+import com.bankteller.admin.dashboard.AdminDashboard;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.WindowAdapter;
@@ -65,6 +66,7 @@ public class TellerManagementUI extends javax.swing.JFrame {
         btnEdit = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -125,6 +127,13 @@ public class TellerManagementUI extends javax.swing.JFrame {
             }
         });
 
+        btnExit.setText("Back to Dashboard");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExitActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -142,14 +151,20 @@ public class TellerManagementUI extends javax.swing.JFrame {
                             .addComponent(btnDelete)
                             .addComponent(btnRefresh)
                             .addComponent(btnEdit)
-                            .addComponent(btnAdd))))
+                            .addComponent(btnAdd)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(btnExit)
+                        .addGap(6, 6, 6)))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(14, 14, 14)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnExit))
                 .addGap(29, 29, 29)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -162,7 +177,7 @@ public class TellerManagementUI extends javax.swing.JFrame {
                         .addComponent(btnDelete)
                         .addGap(18, 18, 18)
                         .addComponent(btnRefresh)))
-                .addContainerGap(243, Short.MAX_VALUE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         pack();
@@ -171,12 +186,13 @@ public class TellerManagementUI extends javax.swing.JFrame {
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
         try {
         int id = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter Teller ID to Edit:"));
-        String name = JOptionPane.showInputDialog(this, "Enter New Name:");
+        String fname = JOptionPane.showInputDialog(this, "Enter New First Name:");
+        String lname = JOptionPane.showInputDialog(this, "Enter New Last Name:");
         int serviceTypeId = Integer.parseInt(JOptionPane.showInputDialog(this,
             "Enter New Service Type ID:\n1 = Deposit\n2 = Withdrawal\n3 = Loan Inquiry\n4 = Account Opening"));
 
-        if (name != null) {
-            manager.updateTeller(id, name, serviceTypeId);
+        if (fname != null || lname != null) {
+            manager.updateTeller(id, fname, lname, serviceTypeId);
             loadTellersToTable();
         }
     } catch (NumberFormatException e) {
@@ -224,6 +240,14 @@ public class TellerManagementUI extends javax.swing.JFrame {
         loadTellersToTable();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
+        setVisible(false);
+        this.dispose();
+        
+        AdminDashboard dashboard = new AdminDashboard();
+        dashboard.setVisible(true);
+    }//GEN-LAST:event_btnExitActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -263,6 +287,7 @@ public class TellerManagementUI extends javax.swing.JFrame {
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnEdit;
+    private javax.swing.JButton btnExit;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;

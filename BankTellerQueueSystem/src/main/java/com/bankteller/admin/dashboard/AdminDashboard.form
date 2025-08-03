@@ -304,7 +304,7 @@
               <Font name="Rockwell Condensed" size="18" style="1"/>
             </Property>
             <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="Longest Wait Time"/>
+            <Property name="text" type="java.lang.String" value="Average Wait Time"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="lblPeopleInQueue">

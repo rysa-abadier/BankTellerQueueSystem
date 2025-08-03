@@ -82,6 +82,19 @@ public class ServiceManager {
         String sql = "DELETE FROM services WHERE id = ?";
         try {
             Connection conn = db.connect();
+            
+            PreparedStatement clearTellers = conn.prepareStatement(
+                "UPDATE tellers SET service_id = NULL WHERE service_id = ?"
+            );
+            clearTellers.setInt(1, id);
+            clearTellers.executeUpdate();
+
+            PreparedStatement clearTransactions = conn.prepareStatement(
+                "UPDATE transactions SET service_id = NULL WHERE service_id = ?"
+            );
+            clearTransactions.setInt(1, id);
+            clearTransactions.executeUpdate();
+            
             PreparedStatement stmt = conn.prepareStatement(sql);
             
             stmt.setInt(1, id);

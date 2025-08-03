@@ -67,7 +67,7 @@ public class ReportsPanelUI extends javax.swing.JFrame {
             // Daily Customers
             int total = 0, ctr = 0;
             
-            rs = stmt.executeQuery("SELECT COUNT(*) AS No_Of_DailyCustomers FROM Customers GROUP BY DATE(Transaction_Date)");
+            rs = stmt.executeQuery("SELECT COUNT(*) AS No_Of_DailyCustomers FROM transactions GROUP BY DATE(Transaction_Date)");
             
             while (rs.next()) {
                 ctr++;
@@ -82,7 +82,7 @@ public class ReportsPanelUI extends javax.swing.JFrame {
             // Transactions Today
             String num = "";
             
-            rs = stmt.executeQuery("SELECT COUNT(*) AS No_Of_TransactionsToday FROM Customers WHERE DATE(Transaction_Date) = '2025-07-31'");
+            rs = stmt.executeQuery("SELECT COUNT(*) AS No_Of_TransactionsToday FROM transactions WHERE DATE(Transaction_Date) = '2025-07-31'");
             
             while (rs.next()) {
                 num = rs.getString("No_Of_TransactionsToday");
@@ -94,7 +94,7 @@ public class ReportsPanelUI extends javax.swing.JFrame {
             total = 0;
             ctr = 0;
             
-            rs = stmt.executeQuery("SELECT Start_Time, TIMESTAMPDIFF(SECOND, TIME(transaction_date), start_time) AS WaitingTime FROM Customers");
+            rs = stmt.executeQuery("SELECT Start_Time, TIMESTAMPDIFF(SECOND, TIME(transaction_date), start_time) AS WaitingTime FROM transactions");
             
             while (rs.next()) {
                 if (!rs.getTime("Start_Time").toString().equals("00:00:00")) {
@@ -113,7 +113,7 @@ public class ReportsPanelUI extends javax.swing.JFrame {
             // Most Requested Service
             rs = stmt.executeQuery("SELECT s.name AS Service_Name, sub.Service_Count FROM (\n" +
                 "    SELECT Service_ID, COUNT(*) AS Service_Count\n" +
-                "    FROM Customers\n" +
+                "    FROM transactions\n" +
                 "    GROUP BY Service_ID\n" +
             ") AS sub\n" +
             "JOIN Services s ON s.id = sub.Service_ID\n" +
@@ -139,7 +139,7 @@ public class ReportsPanelUI extends javax.swing.JFrame {
             
             rs = stmt.executeQuery("SELECT t.Service_ID, CONCAT(t.First_Name, ' ', t.Last_Name) AS Name, sub.Transactions_Count, (sub.Handling_Time_Sum/sub.Transactions_Count) AS AvgHandlingTime FROM (\n" +
                 "   SELECT Teller_ID, COUNT(*) AS Transactions_Count, SUM(TIMESTAMPDIFF(SECOND, Start_Time, End_Time)) AS Handling_Time_Sum\n" +
-                "   FROM Customers\n" +
+                "   FROM transactions\n" +
                 "   WHERE Status = 'Completed'\n" +
                 "   GROUP BY Teller_ID\n" +
             ") AS sub\n" +
@@ -216,21 +216,21 @@ public class ReportsPanelUI extends javax.swing.JFrame {
             int[] volumes = new int[periods.length];
             
             // Today
-            rs = stmt.executeQuery("SELECT COUNT(*) AS CustomerValue FROM Customers WHERE DATE(Transaction_Date) = '2025-07-31'");
+            rs = stmt.executeQuery("SELECT COUNT(*) AS CustomerValue FROM transactions WHERE DATE(Transaction_Date) = '2025-07-31'");
 
             while (rs.next()) {
                 volumes[0] = rs.getInt("CustomerValue");
             }
             
             // Yesterday
-            rs = stmt.executeQuery("SELECT COUNT(*) AS CustomerValue FROM Customers WHERE DATE(Transaction_Date) = '2025-07-30'");
+            rs = stmt.executeQuery("SELECT COUNT(*) AS CustomerValue FROM transactions WHERE DATE(Transaction_Date) = '2025-07-30'");
 
             while (rs.next()) {
                 volumes[1] = rs.getInt("CustomerValue");
             }
             
             // Last Week
-            rs = stmt.executeQuery("SELECT COUNT(*) AS CustomerValue FROM Customers WHERE DATE(Transaction_Date) BETWEEN '2025-07-20' AND '2025-07-26'");
+            rs = stmt.executeQuery("SELECT COUNT(*) AS CustomerValue FROM transactions WHERE DATE(Transaction_Date) BETWEEN '2025-07-20' AND '2025-07-26'");
 
             while (rs.next()) {
                 volumes[2] = rs.getInt("CustomerValue");
@@ -256,11 +256,11 @@ public class ReportsPanelUI extends javax.swing.JFrame {
             DefaultTableModel model = (DefaultTableModel) tblHeatMap.getModel();
             model.setRowCount(0);
             
-            int[] hours = {8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+            int[] hours = {8, 9, 10, 11, 12, 13, 14, 15, 16};
             String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
             int[][] avg = new int[days.length][hours.length];
             
-            rs = stmt.executeQuery("SELECT DAYNAME(Transaction_Date) AS DayOfWeek, HOUR(Transaction_Date) AS HourOfDay, COUNT(*) AS TotalTransactions, ROUND(COUNT(*) / COUNT(DISTINCT DATE(Transaction_Date))) AS AvgTransactions FROM Customers WHERE Status = 'Completed' GROUP BY HOUR(Transaction_Date), DAYNAME(Transaction_Date);");
+            rs = stmt.executeQuery("SELECT DAYNAME(Transaction_Date) AS DayOfWeek, HOUR(Transaction_Date) AS HourOfDay, COUNT(*) AS TotalTransactions, ROUND(COUNT(*) / COUNT(DISTINCT DATE(Transaction_Date))) AS AvgTransactions FROM transactions WHERE Status = 'Completed' GROUP BY HOUR(Transaction_Date), DAYNAME(Transaction_Date);");
 
             while (rs.next()) {
                 int dayIdx = dayOfWeek(rs.getString("DayOfWeek"));
@@ -588,13 +588,13 @@ public class ReportsPanelUI extends javax.swing.JFrame {
 
         tblHeatMap.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {"12", "15", "10", "8", "9", "11", "13", "16", "14", "10"},
-                {"8", "10", "12", "14", "16", "13", "9", "7", "6", "4"},
-                {"14", "12", "13", "15", "17", "16", "14", "12", "10", "9"},
-                {"7", "6", "8", "10", "11", "12", "14", "13", "12", "11"}
+                {"12", "15", "10", "8", "9", "11", "13", "16", "14"},
+                {"8", "10", "12", "14", "16", "13", "9", "7", "6"},
+                {"14", "12", "13", "15", "17", "16", "14", "12", "10"},
+                {"7", "6", "8", "10", "11", "12", "14", "13", "12"}
             },
             new String [] {
-                "8 AM", "9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM", "4 PM", "5 PM"
+                "8 AM", "9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM", "4 PM"
             }
         ));
         scrllHeatMap.setViewportView(tblHeatMap);

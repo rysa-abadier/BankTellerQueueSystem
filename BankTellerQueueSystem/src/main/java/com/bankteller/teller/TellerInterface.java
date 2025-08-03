@@ -1,9 +1,11 @@
 package com.bankteller.teller;
 
 import com.bankteller.index.*;
+import com.bankteller.admin.queue.*;
 import com.bankteller.admin.dashboard.*;
 import java.awt.Font;
 import java.sql.*;
+import java.text.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -11,13 +13,16 @@ import javax.swing.table.*;
 public class TellerInterface extends javax.swing.JFrame {
     private final DBConnection db = new DBConnection();
     private Connection conn;
+    private Statement stmt;
+    private ResultSet rs;
+    private DefaultTableModel model;
     
     private final Font placeholder = new Font("Yu Gothic", Font.ITALIC, 14);
     private final Font data = new Font("Yu Gothic", Font.PLAIN, 14);
     
     private int selectedQueueNum = -1;    
     private int tellerID = Login.getTellerID();
-    private Queue<Integer> queue = new LinkedList<>();
+    private QueueManager manager = new QueueManager();
     
     /**
      * Creates new form QueueManagementUI
@@ -34,73 +39,59 @@ public class TellerInterface extends javax.swing.JFrame {
         setUpSelectionListener(tblActive);
     }
     
-    private void refreshData() {
-        try {
-            conn = db.connect();
+    private void getActive() {
+        model = (DefaultTableModel) tblActive.getModel();
+        model.setRowCount(0);
 
-            Statement stmt = conn.createStatement();
-            ResultSet rs;
-            DefaultTableModel model;
-            
-            // Active Customers
-            model = (DefaultTableModel) tblActive.getModel();
-            model.setRowCount(0);
+        int active = manager.getActiveCustomers(tellerID);
 
-            rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Active' AND DATE(Transaction_Date) = '2025-07-31' AND teller_id = " + tellerID);
-
-            while (rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("queue_no")
-                });
-            }
-            
-            // Queued Customers
-            queue.clear();
-            
-            model = (DefaultTableModel) tblQueue.getModel();
-            model.setRowCount(0);
-            
-            String[] statuses = {"Queued", "Reassigned", "Skipped"};
-            
-            String[] emergencies = {"Yes", "NO"};
-            
-            for (String emergency: emergencies) {
-                for (String status: statuses) {
-                    rs = stmt.executeQuery("SELECT * FROM customers WHERE emergency = '" + emergency + "' AND teller_id = " + tellerID + " AND DATE(Transaction_Date) = '2025-07-31' AND status = '" + status + "'");
-
-                    while (rs.next()) {
-                        queue.add(rs.getInt("queue_no"));
-                        
-                        model.addRow(new Object[]{
-                            rs.getInt("teller_id"),
-                            rs.getInt("queue_no"),
-                            rs.getString("status")
-                        });
-                    }
-                }
-            }
-            
-            viewQueue.setText("0");
-            viewName.setText("None Selected");
-            viewService.setText("None Selected");
-            viewStatus.setText("None Selected");
-            viewTeller.setText("None Selected");
-            chkEmergency.setSelected(false);
-            viewStart.setText("None Selected");
-            viewEnd.setText("None Selected");
-            
-            viewName.setFont(placeholder);
-            viewQueue.setFont(placeholder);
-            viewService.setFont(placeholder);
-            viewStatus.setFont(placeholder);
-            viewTeller.setFont(placeholder);
-            viewStart.setFont(placeholder);
-            viewEnd.setFont(placeholder);
-            
-            conn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        model.addRow(new Object[]{
+            active == 0 ? null : active
+        });
+    }
+    
+    private void getQueued() {
+        model = (DefaultTableModel) tblQueue.getModel();
+        model.setRowCount(0);
+        
+        Queue<Transaction> queue = manager.getTellerQueue(tellerID);
+        
+        for (Transaction q : queue) {
+            model.addRow(new Object[]{
+                q.getTeller_id(),
+                q.getQueue_no(),
+                q.getStatus()
+            });
         }
+    }
+    
+    private void refreshData() {
+        getActive();
+        getQueued();
+
+        viewQueue.setText("0");
+        viewName.setText("None Selected");
+        viewService.setText("None Selected");
+        viewStatus.setText("None Selected");
+        viewTeller.setText("None Selected");
+        chkEmergency.setSelected(false);
+        viewStart.setText("None Selected");
+        viewEnd.setText("None Selected");
+        
+        viewAccName.setText("No Active Customer");
+        viewAccName.setText("No Active Customer");
+        viewAccName.setText("No Active Customer");
+
+        viewName.setFont(placeholder);
+        viewQueue.setFont(placeholder);
+        viewService.setFont(placeholder);
+        viewStatus.setFont(placeholder);
+        viewTeller.setFont(placeholder);
+        viewStart.setFont(placeholder);
+        viewEnd.setFont(placeholder);
+        viewAccNum.setFont(placeholder);
+        viewAccName.setFont(placeholder);
+        viewAmount.setFont(placeholder);
     }
     
     private void setUpSelectionListener(JTable table) {
@@ -115,7 +106,7 @@ public class TellerInterface extends javax.swing.JFrame {
                     conn = db.connect();
 
                     Statement stmt = conn.createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE teller_id = " + tellerID + " AND DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
+                    ResultSet rs = stmt.executeQuery(manager.selectByQueueNum(selectedQueueNum));
                     
                     if (rs.next()) {
                         int tellerId = rs.getInt("teller_id");
@@ -143,12 +134,12 @@ public class TellerInterface extends javax.swing.JFrame {
                         
                         ResultSet tellerSQL = stmt.executeQuery("SELECT * FROM tellers WHERE id = " + tellerId);
                         if (tellerSQL.next()) {
-                            viewTeller.setText(tellerSQL.getString("first_name") + " " + tellerSQL.getString("last_name"));
+                            viewTeller.setText(tellerSQL.getString("first_name") != null && tellerSQL.getString("last_name") != null ? tellerSQL.getString("first_name") + " " + tellerSQL.getString("last_name") : "REMOVED TELLER");
                         }
                         
                         ResultSet serviceSQL = stmt.executeQuery("SELECT * FROM services WHERE id = " + serviceId);
                         if (serviceSQL.next()) {
-                            viewService.setText(serviceSQL.getString("name"));
+                            viewService.setText(serviceSQL.getString("name") != null ? serviceSQL.getString("name") : "DELETED SERVICE");
                         }
                         
                         viewName.setFont(data);
@@ -179,14 +170,15 @@ public class TellerInterface extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        pnlQueueMgmt = new javax.swing.JPanel();
+        pnlTellerInterface = new javax.swing.JPanel();
         pnlQueue = new javax.swing.JPanel();
         scrllQueue = new javax.swing.JScrollPane();
         tblQueue = new javax.swing.JTable();
         scrllActive = new javax.swing.JScrollPane();
         tblActive = new javax.swing.JTable();
         btnNext = new javax.swing.JButton();
-        pnlDetails = new javax.swing.JPanel();
+        btnExit = new javax.swing.JButton();
+        pnlCustomerDetails = new javax.swing.JPanel();
         lblName = new javax.swing.JLabel();
         lblTeller = new javax.swing.JLabel();
         lblService = new javax.swing.JLabel();
@@ -206,11 +198,18 @@ public class TellerInterface extends javax.swing.JFrame {
         viewStart = new javax.swing.JLabel();
         viewEnd = new javax.swing.JLabel();
         btnComplete = new javax.swing.JButton();
-        btnExit = new javax.swing.JButton();
+        pnlAccDetails = new javax.swing.JPanel();
+        lblAccName = new javax.swing.JLabel();
+        lblAccNum = new javax.swing.JLabel();
+        viewAccNum = new javax.swing.JLabel();
+        viewAccName = new javax.swing.JLabel();
+        pnlTransactionDetails = new javax.swing.JPanel();
+        lblAmount = new javax.swing.JLabel();
+        viewAmount = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        pnlQueueMgmt.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Queue Management", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Yu Gothic", 3, 14))); // NOI18N
+        pnlTellerInterface.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Teller Interface", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Yu Gothic", 3, 14))); // NOI18N
 
         pnlQueue.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Queue", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Yu Gothic", 2, 12))); // NOI18N
 
@@ -300,7 +299,15 @@ public class TellerInterface extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pnlDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Customer Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Yu Gothic", 2, 12))); // NOI18N
+        btnExit.setFont(new java.awt.Font("Yu Gothic", 0, 12)); // NOI18N
+        btnExit.setText("LOGOUT");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExitActionPerformed(evt);
+            }
+        });
+
+        pnlCustomerDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Customer Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Yu Gothic", 2, 12))); // NOI18N
 
         lblName.setFont(new java.awt.Font("Yu Gothic", 3, 14)); // NOI18N
         lblName.setText("Customer Name:");
@@ -388,41 +395,41 @@ public class TellerInterface extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout pnlDetailsLayout = new javax.swing.GroupLayout(pnlDetails);
-        pnlDetails.setLayout(pnlDetailsLayout);
-        pnlDetailsLayout.setHorizontalGroup(
-            pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlDetailsLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlCustomerDetailsLayout = new javax.swing.GroupLayout(pnlCustomerDetails);
+        pnlCustomerDetails.setLayout(pnlCustomerDetailsLayout);
+        pnlCustomerDetailsLayout.setHorizontalGroup(
+            pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCustomerDetailsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDetailsLayout.createSequentialGroup()
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlCustomerDetailsLayout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(lblQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(viewQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(pnlDetailsLayout.createSequentialGroup()
-                        .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(pnlCustomerDetailsLayout.createSequentialGroup()
+                        .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(lblEnd, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblStart, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblEmergency, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblService, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlDetailsLayout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlCustomerDetailsLayout.createSequentialGroup()
                                 .addComponent(lblTeller, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGap(24, 24, 24)))
                         .addGap(18, 18, 18)
-                        .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(pnlDetailsLayout.createSequentialGroup()
+                        .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlCustomerDetailsLayout.createSequentialGroup()
                                 .addComponent(chkEmergency, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 50, Short.MAX_VALUE))
+                                .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(viewName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(viewTeller, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(viewService, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(viewStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(viewStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(viewEnd, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDetailsLayout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlCustomerDetailsLayout.createSequentialGroup()
                         .addComponent(btnComplete)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnReassign)
@@ -430,92 +437,169 @@ public class TellerInterface extends javax.swing.JFrame {
                         .addComponent(btnSkip)))
                 .addContainerGap())
         );
-        pnlDetailsLayout.setVerticalGroup(
-            pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlDetailsLayout.createSequentialGroup()
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        pnlCustomerDetailsLayout.setVerticalGroup(
+            pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCustomerDetailsLayout.createSequentialGroup()
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblQueue)
                     .addComponent(viewQueue))
                 .addGap(18, 18, 18)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblTeller)
                     .addComponent(viewTeller))
                 .addGap(18, 18, 18)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblName)
                     .addComponent(viewName))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblService)
                     .addComponent(viewService))
                 .addGap(18, 18, 18)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
                     .addComponent(viewStatus))
                 .addGap(18, 18, 18)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkEmergency)
                     .addComponent(lblEmergency))
                 .addGap(18, 18, 18)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStart)
                     .addComponent(viewStart))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblEnd)
                     .addComponent(viewEnd))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(pnlDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
+                .addGroup(pnlCustomerDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnReassign)
                     .addComponent(btnSkip)
                     .addComponent(btnComplete))
                 .addContainerGap())
         );
 
-        btnExit.setFont(new java.awt.Font("Yu Gothic", 0, 12)); // NOI18N
-        btnExit.setText("LOGOUT");
-        btnExit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnExitActionPerformed(evt);
-            }
-        });
+        pnlAccDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Account Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Yu Gothic", 2, 12))); // NOI18N
 
-        javax.swing.GroupLayout pnlQueueMgmtLayout = new javax.swing.GroupLayout(pnlQueueMgmt);
-        pnlQueueMgmt.setLayout(pnlQueueMgmtLayout);
-        pnlQueueMgmtLayout.setHorizontalGroup(
-            pnlQueueMgmtLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlQueueMgmtLayout.createSequentialGroup()
+        lblAccName.setFont(new java.awt.Font("Yu Gothic", 3, 14)); // NOI18N
+        lblAccName.setText("Account Name:");
+
+        lblAccNum.setFont(new java.awt.Font("Yu Gothic", 3, 14)); // NOI18N
+        lblAccNum.setText("Account Number:");
+
+        viewAccNum.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
+        viewAccNum.setText("No Active Customer");
+        viewAccNum.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
+        viewAccName.setFont(new java.awt.Font("Yu Gothic", 0, 14)); // NOI18N
+        viewAccName.setText("No Active Customer");
+        viewAccName.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
+        javax.swing.GroupLayout pnlAccDetailsLayout = new javax.swing.GroupLayout(pnlAccDetails);
+        pnlAccDetails.setLayout(pnlAccDetailsLayout);
+        pnlAccDetailsLayout.setHorizontalGroup(
+            pnlAccDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAccDetailsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pnlQueue, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(pnlAccDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblAccName, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblAccNum, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlQueueMgmtLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnExit)
-                .addGap(17, 17, 17))
+                .addGroup(pnlAccDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(viewAccName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAccDetailsLayout.createSequentialGroup()
+                        .addComponent(viewAccNum, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
-        pnlQueueMgmtLayout.setVerticalGroup(
-            pnlQueueMgmtLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlQueueMgmtLayout.createSequentialGroup()
+        pnlAccDetailsLayout.setVerticalGroup(
+            pnlAccDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAccDetailsLayout.createSequentialGroup()
+                .addGroup(pnlAccDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblAccNum)
+                    .addComponent(viewAccNum))
+                .addGap(18, 18, 18)
+                .addGroup(pnlAccDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblAccName)
+                    .addComponent(viewAccName)))
+        );
+
+        pnlTransactionDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Transaction Details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Yu Gothic", 2, 12))); // NOI18N
+
+        lblAmount.setFont(new java.awt.Font("Yu Gothic", 3, 14)); // NOI18N
+        lblAmount.setText("Amount Transaction:");
+
+        viewAmount.setFont(new java.awt.Font("Yu Gothic", 0, 16)); // NOI18N
+        viewAmount.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        viewAmount.setText("None Selected");
+        viewAmount.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+
+        javax.swing.GroupLayout pnlTransactionDetailsLayout = new javax.swing.GroupLayout(pnlTransactionDetails);
+        pnlTransactionDetails.setLayout(pnlTransactionDetailsLayout);
+        pnlTransactionDetailsLayout.setHorizontalGroup(
+            pnlTransactionDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlTransactionDetailsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlQueueMgmtLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(lblAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlTransactionDetailsLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(viewAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14))
+        );
+        pnlTransactionDetailsLayout.setVerticalGroup(
+            pnlTransactionDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlTransactionDetailsLayout.createSequentialGroup()
+                .addComponent(lblAmount)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(viewAmount)
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout pnlTellerInterfaceLayout = new javax.swing.GroupLayout(pnlTellerInterface);
+        pnlTellerInterface.setLayout(pnlTellerInterfaceLayout);
+        pnlTellerInterfaceLayout.setHorizontalGroup(
+            pnlTellerInterfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlTellerInterfaceLayout.createSequentialGroup()
+                .addGroup(pnlTellerInterfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlTellerInterfaceLayout.createSequentialGroup()
+                        .addGap(594, 594, 594)
+                        .addComponent(btnExit)
+                        .addGap(11, 11, 11))
+                    .addGroup(pnlTellerInterfaceLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(pnlTellerInterfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(pnlAccDetails, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlQueue, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(pnlTellerInterfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pnlCustomerDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlTransactionDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap())
+        );
+        pnlTellerInterfaceLayout.setVerticalGroup(
+            pnlTellerInterfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlTellerInterfaceLayout.createSequentialGroup()
+                .addGroup(pnlTellerInterfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(pnlAccDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlTransactionDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlTellerInterfaceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnlQueue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(pnlCustomerDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnExit)
-                .addGap(15, 15, 15))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pnlQueueMgmt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(pnlTellerInterface, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pnlQueueMgmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(pnlTellerInterface, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
@@ -541,8 +625,8 @@ public class TellerInterface extends javax.swing.JFrame {
 
             int confirm = JOptionPane.showConfirmDialog(this, "Confirm to skip customer?", "Skip Customer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null);
 
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE teller_id = " + tellerID + " AND DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(manager.selectByQueueNum(selectedQueueNum));
 
             int id = 0;
             String emergency = "";
@@ -558,17 +642,11 @@ public class TellerInterface extends javax.swing.JFrame {
             }
 
             if (confirm == JOptionPane.YES_OPTION) {
-                String sql = "UPDATE customers SET status = 'Skipped', start_time = '00:00:00' WHERE id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-
-                pstmt.setInt(1, id);
-
-                int rows = pstmt.executeUpdate();
+                int rows = manager.skip(id);
                 if (rows > 0) {
+                    refreshData();
                     JOptionPane.showMessageDialog(this, "Customer skipped successfully!");
                 }
-
-                refreshData();
             } else JOptionPane.showMessageDialog(this, "Skipping customer uncessfull!");
 
             conn.close();
@@ -587,8 +665,8 @@ public class TellerInterface extends javax.swing.JFrame {
         try {
             conn = db.connect();
 
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE teller_id = " + tellerID + " AND DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(manager.selectByQueueNum(selectedQueueNum));
 
             int id = 0;
             int teller = -1;
@@ -610,12 +688,12 @@ public class TellerInterface extends javax.swing.JFrame {
 
                 rs = stmt.executeQuery("SELECT * FROM tellers WHERE id = " + tellerId);
                 if (rs.next()) {
-                    tellerName = rs.getString("first_name") + " " + rs.getString("last_name");
+                    tellerName = rs.getString("first_name") != null && rs.getString("last_name") != null ? rs.getString("first_name") + " " + rs.getString("last_name") : "REMOVED TELLER";
                 }
 
                 rs = stmt.executeQuery("SELECT * FROM services WHERE id = " + serviceId);
                 if (rs.next()) {
-                    serviceName = rs.getString("name");
+                    serviceName = rs.getString("name") != null ? rs.getString("name") : "DELETED SERVICE";
                 }
 
                 if (status.equals("Completed")) {
@@ -635,7 +713,7 @@ public class TellerInterface extends javax.swing.JFrame {
                 rs = stmt.executeQuery("SELECT * FROM services WHERE id = " + service);
 
                 if (rs.next()) {
-                    sb.append(rs.getString("name"));
+                    sb.append(rs.getString("name") != null ? rs.getString("name") : "DELETED SERVICE");
                 }
 
                 options[i] = sb.toString();
@@ -649,19 +727,13 @@ public class TellerInterface extends javax.swing.JFrame {
                         teller = (i+1);
                     }
                 }
-
-                String sql = "UPDATE customers SET teller_id = ?, status = 'Reassigned', start_time = '00:00:00' WHERE id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-
-                pstmt.setInt(1, teller);
-                pstmt.setInt(2, id);
-
-                int rows = pstmt.executeUpdate();
+                
+                int rows = manager.reassign(id, teller);
                 if (rows > 0) {
+                    refreshData();
+                    
                     JOptionPane.showMessageDialog(this, "Customer reassigned successfully!");
                 }
-
-                refreshData();
             } else JOptionPane.showMessageDialog(this, "Customer reassignment cancelled!");
             conn.close();
         } catch (Exception e) {
@@ -685,8 +757,8 @@ public class TellerInterface extends javax.swing.JFrame {
 
             int confirm = JOptionPane.showConfirmDialog(this, "Confirm to complete service?", "Complete Service", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null);
 
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM customers WHERE teller_id = " + tellerID + " AND DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + selectedQueueNum);
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(manager.selectByQueueNum(selectedQueueNum));
 
             int id = 0;
 
@@ -695,8 +767,7 @@ public class TellerInterface extends javax.swing.JFrame {
             }
 
             if (confirm == JOptionPane.YES_OPTION) {
-                String sql = "UPDATE customers SET status = 'Completed', end_time = CURRENT_TIME() WHERE id = ?";
-                PreparedStatement pstmt = conn.prepareStatement(sql);
+                PreparedStatement pstmt = conn.prepareStatement(manager.updateQuery("`status` = 'Completed', end_time = CURRENT_TIME()"));
 
                 pstmt.setInt(1, id);
 
@@ -716,6 +787,8 @@ public class TellerInterface extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCompleteActionPerformed
 
     private void btnNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextActionPerformed
+        Queue<Transaction> queue = manager.getTellerQueue(tellerID);
+        
         if (queue.isEmpty()) {
             JOptionPane.showMessageDialog(this, "There are no customers in queue.");
             return;
@@ -723,13 +796,11 @@ public class TellerInterface extends javax.swing.JFrame {
 
         try {
             conn = db.connect();
+            stmt = conn.createStatement();
 
             int confirm = JOptionPane.showConfirmDialog(this, "Confirm to call customer?", "Next Customer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null);
-
-            Statement stmt = conn.createStatement();
-            ResultSet rs;
             
-            rs = stmt.executeQuery("SELECT * FROM customers WHERE status = 'Active' AND DATE(Transaction_Date) = '2025-07-31' AND teller_id = " + tellerID);
+            rs = stmt.executeQuery(manager.selectWithTeller("*", tellerID, "`status` = 'Active'", true));
 
             if (rs.next()) {
                 JOptionPane.showMessageDialog(this, "You have an active customer! Cannot call on next customer.");
@@ -737,15 +808,36 @@ public class TellerInterface extends javax.swing.JFrame {
             }
 
             if (confirm == JOptionPane.YES_OPTION) {
-                int customer = queue.poll();
+                Transaction customer = queue.poll();
                 
-                System.out.println(customer);
+                PreparedStatement pstmt = conn.prepareStatement(manager.updateQuery("`status` = 'Active', start_time = CURRENT_TIME()"));
                 
-                String sql = "UPDATE customers SET status = 'Active', start_time = CURRENT_TIME() WHERE DATE(Transaction_Date) = '2025-07-31' AND queue_no = " + customer;
-                PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setInt(1, customer.getId());
 
                 int rows = pstmt.executeUpdate();
                 if (rows > 0) {
+                    rs = stmt.executeQuery(manager.selectAccount(tellerID, customer.getCustomer_id()));
+                    
+                    while (rs.next()) {
+                        if (customer.getService_id() == 3 || customer.getService_id() == 4) {
+                            viewAccNum.setText("Not Applicable");
+                            viewAccName.setText("Not Applicable");
+                            viewAmount.setText("Not Applicable");
+                        } else {
+                            viewAccNum.setText(Integer.toString(rs.getInt("AccNum")));
+                            viewAccName.setText(rs.getString("AccName"));
+
+                            double min = 5000.00;
+                            double max = min + 100.00;
+                            double randomValue = min + (Math.random() * (max - min));
+
+                            viewAmount.setText(Double.toString(Math.round(randomValue * 100.0) / 100.0));
+                        }
+                    }
+                    viewAccNum.setFont(data);
+                    viewAccName.setFont(data);
+                    viewAmount.setFont(data);
+                    
                     JOptionPane.showMessageDialog(this, "Next customer called successfully!");
                 }
 
@@ -802,6 +894,9 @@ public class TellerInterface extends javax.swing.JFrame {
     private javax.swing.JButton btnReassign;
     private javax.swing.JButton btnSkip;
     private javax.swing.JCheckBox chkEmergency;
+    private javax.swing.JLabel lblAccName;
+    private javax.swing.JLabel lblAccNum;
+    private javax.swing.JLabel lblAmount;
     private javax.swing.JLabel lblEmergency;
     private javax.swing.JLabel lblEnd;
     private javax.swing.JLabel lblName;
@@ -810,13 +905,18 @@ public class TellerInterface extends javax.swing.JFrame {
     private javax.swing.JLabel lblStart;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JLabel lblTeller;
-    private javax.swing.JPanel pnlDetails;
+    private javax.swing.JPanel pnlAccDetails;
+    private javax.swing.JPanel pnlCustomerDetails;
     private javax.swing.JPanel pnlQueue;
-    private javax.swing.JPanel pnlQueueMgmt;
+    private javax.swing.JPanel pnlTellerInterface;
+    private javax.swing.JPanel pnlTransactionDetails;
     private javax.swing.JScrollPane scrllActive;
     private javax.swing.JScrollPane scrllQueue;
     private javax.swing.JTable tblActive;
     private javax.swing.JTable tblQueue;
+    private javax.swing.JLabel viewAccName;
+    private javax.swing.JLabel viewAccNum;
+    private javax.swing.JLabel viewAmount;
     private javax.swing.JLabel viewEnd;
     private javax.swing.JLabel viewName;
     private javax.swing.JLabel viewQueue;
