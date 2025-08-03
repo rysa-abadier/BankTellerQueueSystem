@@ -329,11 +329,26 @@ public class QueueManager {
         return sb.toString();
     }
     
+    public int getNextQueueNum() {
+        try {
+            conn = db.connect();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(selectQuery("MAX(queue_no) AS QueueNum", true));
+            
+            while (rs.next()) {
+		return rs.getInt("QueueNum") + 1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
     public int enqueue(int accNum, int teller, int service, String name, boolean emergency) {
-        String sql = "INSERT INTO transactions (customer_id, teller_id, service_id, queue_no, name, emergency, transaction_date) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, CONCAT(CURDATE(), ' ', CURTIME()))";
+        String sql = "INSERT INTO transactions (customer_id, teller_id, service_id, queue_no, name, emergency, transaction_date) VALUES (?, ?, ?, ?, ?, ?, CONCAT('2025-07-31 ', CURTIME()))";
 
-        int queueNumber = getNextQueueNum(); // generate before using
+        int tokenNum = getNextQueueNum();
+        
         try {
             conn = db.connect();
             stmt = conn.createStatement();
@@ -349,15 +364,15 @@ public class QueueManager {
                     pstmt.setInt(1, accNum);
                     pstmt.setInt(2, teller);
                     pstmt.setInt(3, service);
-                    pstmt.setInt(4, queueNumber); // use here
+                    pstmt.setInt(4, tokenNum);
                     pstmt.setString(5, name);
                     pstmt.setString(6, emergency ? "Yes" : "No");
 
                     int rows = pstmt.executeUpdate();
 
                     pstmt.close();
-                    if (rows > 0) return queueNumber; // success
-                    else return -1; // insert failed
+                    if (rows > 0) return tokenNum;
+                    else return -1;
                 }
             }
 
@@ -365,7 +380,6 @@ public class QueueManager {
                 System.out.println("Customer ID " + accNum + " not found.");
                 return -1;
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -376,22 +390,6 @@ public class QueueManager {
             } catch (SQLException ignore) {}
         }
 
-        return -1; // failure
-    }
-
-    
-    public int getNextQueueNum() {
-        try {
-            conn = db.connect();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(selectQuery("MAX(queue_no) AS QueueNum", true));
-            
-            while (rs.next()) {
-		return rs.getInt("QueueNum") + 1;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return -1;
     }
 }
