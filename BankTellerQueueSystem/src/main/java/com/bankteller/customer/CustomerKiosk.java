@@ -1,15 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package com.bankteller.customer;
 
-/**
- *
- * @author Rysa
- */
-public class CustomerKiosk extends javax.swing.JFrame {
+import com.bankteller.admin.queue.QueueManager;
+import javax.swing.*;
+import java.awt.GridLayout;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+public class CustomerKiosk extends javax.swing.JFrame {
     /**
      * Creates new form CustomerKiosk
      */
@@ -43,6 +41,11 @@ public class CustomerKiosk extends javax.swing.JFrame {
 
         btnDeposit.setFont(new java.awt.Font("Yu Gothic", 0, 18)); // NOI18N
         btnDeposit.setText("Deposit");
+        btnDeposit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDepositActionPerformed(evt);
+            }
+        });
 
         btnWithdrawal.setFont(new java.awt.Font("Yu Gothic", 0, 18)); // NOI18N
         btnWithdrawal.setText("Withdrawal");
@@ -54,12 +57,27 @@ public class CustomerKiosk extends javax.swing.JFrame {
 
         btnLoan.setFont(new java.awt.Font("Yu Gothic", 0, 18)); // NOI18N
         btnLoan.setText("Loan Inquiry");
+        btnLoan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoanActionPerformed(evt);
+            }
+        });
 
         btnBills.setFont(new java.awt.Font("Yu Gothic", 0, 18)); // NOI18N
         btnBills.setText("Bills Payment");
+        btnBills.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBillsActionPerformed(evt);
+            }
+        });
 
         btnOpening.setFont(new java.awt.Font("Yu Gothic", 0, 18)); // NOI18N
         btnOpening.setText("Account Opening");
+        btnOpening.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOpeningActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pnlKioskLayout = new javax.swing.GroupLayout(pnlKiosk);
         pnlKiosk.setLayout(pnlKioskLayout);
@@ -117,9 +135,113 @@ public class CustomerKiosk extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private static final Map<String, Boolean> emergencyReasons = new LinkedHashMap<>();
+    static {
+        emergencyReasons.put("Pregnant", true);
+        emergencyReasons.put("Person with Disability (PWD)", true);
+        emergencyReasons.put("Senior Citizen", true);
+        emergencyReasons.put("Health Emergency", true);
+        emergencyReasons.put("Military / Frontliner", true);
+        emergencyReasons.put("None of the above", false);
+    }
+    
+    private static final Map<Integer, String> serviceNames = new HashMap<>();
+        static {
+            serviceNames.put(1, "Deposit");
+            serviceNames.put(2, "Withdrawal");
+            serviceNames.put(3, "Loan Inquiry");
+            serviceNames.put(4, "Account Opening");
+            serviceNames.put(5, "Bills Payment");
+        }
+
+
+    private void enqueueTransaction(int serviceId, int tellerId) {
+        QueueManager qm = new QueueManager();
+
+        JTextField nameField = new JTextField();
+        JTextField accNumField = new JTextField();
+
+        String[] priorityOptions = emergencyReasons.keySet().toArray(new String[0]);
+        JComboBox<String> priorityDropdown = new JComboBox<>(priorityOptions);
+
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        panel.add(new JLabel("Customer Name:"));
+        panel.add(nameField);
+        panel.add(new JLabel("Account Number:"));
+        panel.add(accNumField);
+        panel.add(new JLabel("Priority Reason (if any):"));
+        panel.add(priorityDropdown);
+
+        int result = JOptionPane.showConfirmDialog(null, panel, "Queue a Transaction", JOptionPane.OK_CANCEL_OPTION);
+        if (result != JOptionPane.OK_OPTION) return;
+
+        String name = nameField.getText().trim();
+        String accNumText = accNumField.getText().trim();
+        String selectedReason = (String) priorityDropdown.getSelectedItem();
+
+        if (name.isEmpty() || accNumText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Input Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int accNum;
+        try {
+            accNum = Integer.parseInt(accNumText);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Invalid account number format.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String serviceName = serviceNames.getOrDefault(serviceId, "Unknown");
+        boolean isEmergency = emergencyReasons.getOrDefault(selectedReason, false);
+
+        // Tell QueueManager to enqueue and return the queue number if successful
+        int queueNumber = qm.enqueue(accNum, tellerId, serviceId, name, isEmergency); // teller_id is 0 for kiosk
+
+        if (queueNumber <= 0) {
+            JOptionPane.showMessageDialog(this, "Failed to enqueue transaction.\nPlease check the account number or try again.", "Enqueue Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Token format: E/A + 3-digit number
+        String token = (isEmergency ? "E" : "A") + String.format("%03d", queueNumber);
+
+        JOptionPane.showMessageDialog(this,
+            "<html><b>Transaction Queued!</b><br/>" +
+            "Name: <b>" + name + "</b><br/>" +
+            "Service: <b>" + serviceName + "</b><br/>" +
+            "Token Number: <b>" + token + "</b><br/>" +
+            "Emergency: <b>" + (isEmergency ? "Yes" : "No") + "</b></html>",
+            "Success",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+
+    }
+
     private void btnWithdrawalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnWithdrawalActionPerformed
         // TODO add your handling code here:
+        enqueueTransaction(2, 3);
     }//GEN-LAST:event_btnWithdrawalActionPerformed
+
+    private void btnDepositActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDepositActionPerformed
+        // TODO add your handling code here:
+        enqueueTransaction(1, 1);
+    }//GEN-LAST:event_btnDepositActionPerformed
+
+    private void btnBillsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBillsActionPerformed
+        // TODO add your handling code here:
+        enqueueTransaction(5, 2);
+    }//GEN-LAST:event_btnBillsActionPerformed
+
+    private void btnLoanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoanActionPerformed
+        // TODO add your handling code here:
+        enqueueTransaction(3, 4);
+    }//GEN-LAST:event_btnLoanActionPerformed
+
+    private void btnOpeningActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOpeningActionPerformed
+        // TODO add your handling code here:
+        enqueueTransaction(4, 5);
+    }//GEN-LAST:event_btnOpeningActionPerformed
 
     /**
      * @param args the command line arguments

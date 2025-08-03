@@ -328,4 +328,70 @@ public class QueueManager {
                 
         return sb.toString();
     }
+    
+    public int enqueue(int accNum, int teller, int service, String name, boolean emergency) {
+        String sql = "INSERT INTO transactions (customer_id, teller_id, service_id, queue_no, name, emergency, transaction_date) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, CONCAT(CURDATE(), ' ', CURTIME()))";
+
+        int queueNumber = getNextQueueNum(); // generate before using
+        try {
+            conn = db.connect();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM customers WHERE id = " + accNum);
+
+            boolean customerExists = false;
+
+            while (rs.next()) {
+                if (rs.getInt("id") == accNum) {
+                    customerExists = true;
+
+                    PreparedStatement pstmt = conn.prepareStatement(sql);
+                    pstmt.setInt(1, accNum);
+                    pstmt.setInt(2, teller);
+                    pstmt.setInt(3, service);
+                    pstmt.setInt(4, queueNumber); // use here
+                    pstmt.setString(5, name);
+                    pstmt.setString(6, emergency ? "Yes" : "No");
+
+                    int rows = pstmt.executeUpdate();
+
+                    pstmt.close();
+                    if (rows > 0) return queueNumber; // success
+                    else return -1; // insert failed
+                }
+            }
+
+            if (!customerExists) {
+                System.out.println("Customer ID " + accNum + " not found.");
+                return -1;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException ignore) {}
+        }
+
+        return -1; // failure
+    }
+
+    
+    public int getNextQueueNum() {
+        try {
+            conn = db.connect();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(selectQuery("MAX(queue_no) AS QueueNum", true));
+            
+            while (rs.next()) {
+		return rs.getInt("QueueNum") + 1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

@@ -12,6 +12,7 @@ com\bankteller\admin\teller\TellerManagementUI$3.class
 com\bankteller\admin\analytics\ReportsPanelUI$2.class
 com\bankteller\customer\CustomerKiosk$1.class
 com\bankteller\teller\TellerInterface$3.class
+com\bankteller\customer\CustomerKiosk$4.class
 com\bankteller\admin\teller\TellerManagementUI$6.class
 com\bankteller\index\DBConnection.class
 com\bankteller\admin\service\ServiceConfigurationUI$4.class
@@ -25,6 +26,7 @@ com\bankteller\customer\CustomerKiosk.class
 com\bankteller\teller\TellerInterface$4.class
 com\bankteller\index\Login$4.class
 com\bankteller\teller\TellerInterface.class
+com\bankteller\customer\CustomerKiosk$5.class
 com\bankteller\admin\teller\TellerManagementUI$2.class
 com\bankteller\admin\queue\Transaction.class
 com\bankteller\index\Login$1.class
@@ -38,6 +40,8 @@ com\bankteller\admin\service\ServiceConfigurationUI$2.class
 com\bankteller\admin\service\ServiceConfigurationUI$5.class
 com\bankteller\admin\analytics\ReportsPanelUI$3.class
 com\bankteller\admin\teller\TellerManagementUI$4.class
+com\bankteller\customer\CustomerKiosk$3.class
 com\bankteller\teller\TellerInterface$7.class
 com\bankteller\teller\TellerInterface$1.class
 com\bankteller\admin\analytics\ReportsPanelUI.class
+com\bankteller\customer\CustomerKiosk$6.class

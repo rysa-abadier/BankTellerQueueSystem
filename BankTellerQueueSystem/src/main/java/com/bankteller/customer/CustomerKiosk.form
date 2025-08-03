@@ -103,6 +103,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Deposit"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnDepositActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnWithdrawal">
           <Properties>
@@ -122,6 +125,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Loan Inquiry"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLoanActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnBills">
           <Properties>
@@ -130,6 +136,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Bills Payment"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnBillsActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnOpening">
           <Properties>
@@ -138,6 +147,9 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Account Opening"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnOpeningActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
