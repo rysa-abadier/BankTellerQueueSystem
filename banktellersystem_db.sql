@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 03, 2025 at 09:46 AM
+-- Generation Time: Aug 03, 2025 at 02:15 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -603,7 +603,7 @@ CREATE TABLE `transactions` (
   `emergency` enum('Yes','No') NOT NULL DEFAULT 'No',
   `transaction_date` datetime NOT NULL DEFAULT current_timestamp(),
   `start_time` time DEFAULT NULL,
-  `end_time` time NOT NULL
+  `end_time` time DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
