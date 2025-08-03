@@ -21,6 +21,7 @@ public class TellerInterface extends javax.swing.JFrame {
     private final Font data = new Font("Yu Gothic", Font.PLAIN, 14);
     
     private int selectedQueueNum = -1;    
+    private double randomValue = 0;
     private int tellerID = Login.getTellerID();
     private QueueManager manager = new QueueManager();
     
@@ -77,10 +78,6 @@ public class TellerInterface extends javax.swing.JFrame {
         chkEmergency.setSelected(false);
         viewStart.setText("None Selected");
         viewEnd.setText("None Selected");
-        
-        viewAccName.setText("No Active Customer");
-        viewAccName.setText("No Active Customer");
-        viewAccName.setText("No Active Customer");
 
         viewName.setFont(placeholder);
         viewQueue.setFont(placeholder);
@@ -89,6 +86,13 @@ public class TellerInterface extends javax.swing.JFrame {
         viewTeller.setFont(placeholder);
         viewStart.setFont(placeholder);
         viewEnd.setFont(placeholder);
+    }
+    
+    private void refreshAccount() {
+        viewAccNum.setText("No Active Customer");
+        viewAccName.setText("No Active Customer");
+        viewAmount.setText("No Active Customer");
+
         viewAccNum.setFont(placeholder);
         viewAccName.setFont(placeholder);
         viewAmount.setFont(placeholder);
@@ -777,6 +781,7 @@ public class TellerInterface extends javax.swing.JFrame {
                 }
 
                 refreshData();
+                refreshAccount();
             } else JOptionPane.showMessageDialog(this, "Complete service uncessfull!");
 
             conn.close();
@@ -823,25 +828,29 @@ public class TellerInterface extends javax.swing.JFrame {
                             viewAccNum.setText("Not Applicable");
                             viewAccName.setText("Not Applicable");
                             viewAmount.setText("Not Applicable");
+                            
+                            viewAccNum.setFont(data);
+                            viewAccName.setFont(data);
+                            viewAmount.setFont(data);
                         } else {
                             viewAccNum.setText(Integer.toString(rs.getInt("AccNum")));
                             viewAccName.setText(rs.getString("AccName"));
 
                             double min = 5000.00;
                             double max = min + 100.00;
-                            double randomValue = min + (Math.random() * (max - min));
+                            randomValue = min + (Math.random() * (max - min));
 
                             viewAmount.setText(Double.toString(Math.round(randomValue * 100.0) / 100.0));
+                            
+                            viewAccNum.setFont(data);
+                            viewAccName.setFont(data);
+                            viewAmount.setFont(data);
                         }
                     }
-                    viewAccNum.setFont(data);
-                    viewAccName.setFont(data);
-                    viewAmount.setFont(data);
+                    refreshData();
                     
                     JOptionPane.showMessageDialog(this, "Next customer called successfully!");
                 }
-
-                refreshData();
             } else JOptionPane.showMessageDialog(this, "Next customer call uncessfull!");
 
             conn.close();

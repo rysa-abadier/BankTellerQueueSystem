@@ -120,6 +120,8 @@ public class QueueManager {
                     }
                 }
             }
+            conn.close();
+            
             return queue;
         } catch (Exception e) {
             e.printStackTrace();
@@ -165,6 +167,8 @@ public class QueueManager {
                     }
                 }
             }
+            conn.close();
+            
             return queue;
         } catch (Exception e) {
             e.printStackTrace();
@@ -196,6 +200,8 @@ public class QueueManager {
                 );
                 transactions.add(transaction);
             }
+            
+            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -222,7 +228,9 @@ public class QueueManager {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(selectQuery("queue_no", clause, true));
             
-            while (rs.next()) return rs.getInt("queue_no");
+            while (rs.next()) {
+                return rs.getInt("queue_no");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -245,6 +253,8 @@ public class QueueManager {
             rs = stmt.executeQuery(selectQuery("*", clause, true));
             
             while (rs.next()) complete.add(rs.getInt("queue_no"));
+            
+            conn.close();
             
             return complete;
         } catch (Exception e) {
@@ -279,6 +289,7 @@ public class QueueManager {
                     break;
                 }
             }
+            conn.close();
             
             return row;
         } catch (Exception e) {
@@ -311,6 +322,7 @@ public class QueueManager {
                     break;
                 }
             }
+            conn.close();
             
             return row;
         } catch (Exception e) {
@@ -323,7 +335,7 @@ public class QueueManager {
         StringBuilder sb = new StringBuilder();
         
         sb.append("SELECT t.customer_id AS AccNum, c.acc_name AS AccName FROM `transactions` t LEFT JOIN customers c ON c.id = t.customer_id");
-        sb.append(" WHERE DATE(transaction_date) = '2025-07-31' AND `teller_id` = ").append(id);
+        sb.append(" WHERE DATE(t.transaction_date) = '2025-07-31' AND t.teller_id = ").append(id);
         sb.append(" AND t.customer_id = ").append(acc);
                 
         return sb.toString();
@@ -338,6 +350,8 @@ public class QueueManager {
             while (rs.next()) {
 		return rs.getInt("QueueNum") + 1;
             }
+            
+            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
