@@ -138,7 +138,7 @@ public class CustomerKiosk extends javax.swing.JFrame {
 
     private static final Map<String, Boolean> emergencyReasons = new LinkedHashMap<>();
     static {
-        emergencyReasons.put("None of the above", false);
+        emergencyReasons.put("None", false);
         emergencyReasons.put("Pregnant", true);
         emergencyReasons.put("Person with Disability (PWD)", true);
         emergencyReasons.put("Senior Citizen", true);
