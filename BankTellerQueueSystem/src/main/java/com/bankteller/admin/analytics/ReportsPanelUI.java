@@ -94,7 +94,7 @@ public class ReportsPanelUI extends javax.swing.JFrame {
             total = 0;
             ctr = 0;
             
-            rs = stmt.executeQuery("SELECT Start_Time, TIMESTAMPDIFF(SECOND, TIME(transaction_date), start_time) AS WaitingTime FROM transactions");
+            rs = stmt.executeQuery("SELECT Start_Time, TIMESTAMPDIFF(SECOND, TIME(transaction_date), start_time) AS WaitingTime FROM transactions WHERE `status` = 'Completed'");
             
             while (rs.next()) {
                 if (!rs.getTime("Start_Time").toString().equals("00:00:00")) {
