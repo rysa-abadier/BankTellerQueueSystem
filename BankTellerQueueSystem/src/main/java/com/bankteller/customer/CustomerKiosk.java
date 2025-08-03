@@ -1,5 +1,6 @@
 package com.bankteller.customer;
 
+import com.bankteller.index.Login;
 import com.bankteller.admin.queue.QueueManager;
 import javax.swing.*;
 import java.awt.GridLayout;
@@ -137,12 +138,12 @@ public class CustomerKiosk extends javax.swing.JFrame {
 
     private static final Map<String, Boolean> emergencyReasons = new LinkedHashMap<>();
     static {
+        emergencyReasons.put("None of the above", false);
         emergencyReasons.put("Pregnant", true);
         emergencyReasons.put("Person with Disability (PWD)", true);
         emergencyReasons.put("Senior Citizen", true);
         emergencyReasons.put("Health Emergency", true);
         emergencyReasons.put("Military / Frontliner", true);
-        emergencyReasons.put("None of the above", false);
     }
     
     private static final Map<Integer, String> serviceNames = new HashMap<>();
@@ -196,7 +197,7 @@ public class CustomerKiosk extends javax.swing.JFrame {
         boolean isEmergency = emergencyReasons.getOrDefault(selectedReason, false);
 
         // Tell QueueManager to enqueue and return the queue number if successful
-        int queueNumber = qm.enqueue(accNum, tellerId, serviceId, name, isEmergency); // teller_id is 0 for kiosk
+        int queueNumber = qm.enqueue(accNum, tellerId, serviceId, name, isEmergency); 
 
         if (queueNumber <= 0) {
             JOptionPane.showMessageDialog(this, "Failed to enqueue transaction.\nPlease check the account number or try again.", "Enqueue Failed", JOptionPane.ERROR_MESSAGE);
@@ -216,6 +217,8 @@ public class CustomerKiosk extends javax.swing.JFrame {
             JOptionPane.INFORMATION_MESSAGE
         );
 
+        this.dispose();
+        new Login().setVisible(true);
     }
 
     private void btnWithdrawalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnWithdrawalActionPerformed
