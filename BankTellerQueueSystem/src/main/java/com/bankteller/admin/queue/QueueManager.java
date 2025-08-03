@@ -355,9 +355,13 @@ public class QueueManager {
 
                     int rows = pstmt.executeUpdate();
 
-                    pstmt.close();
-                    if (rows > 0) return queueNumber; // success
-                    else return -1; // insert failed
+                    if (rows > 0) {
+                        System.out.println("Transaction inserted successfully.");
+                        return queueNumber;
+                    } else {
+                        System.out.println("Insert failed.");
+                        return -1;
+                    }
                 }
             }
 
